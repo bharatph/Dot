@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(Dot VERSION 0.1 LANGUAGES CXX DESCRIPTION "Asynchronous Networking library for C++")
+find_package(Threads)
 file(GLOB_RECURSE Dot_HDRS "include/*hpp")
 file(GLOB_RECURSE Dot_SRCS "src/*.cpp")
 
@@ -7,6 +8,7 @@ file(GLOB_RECURSE Dot_SRCS "src/*.cpp")
 
 add_library(Dot ${Dot_HDRS} ${Dot_SRCS})
 target_compile_features(Dot PRIVATE cxx_enum_forward_declarations)
+target_link_libraries(Dot ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(Dot -lclog)
 target_link_libraries(Dot -lcomm)
 if(WIN32)
