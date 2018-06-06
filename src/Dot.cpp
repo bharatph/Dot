@@ -21,8 +21,9 @@ void dot::Dot::listen(int port)
     while (closeServerFlag == false)
     {
         SOCKET sock = comm_start_server(port);
-        Dot d = Dot(sock);
-        serverThreads.push_back(new std::thread(&Dot::serve, this, d));
+        Dot *d = new Dot(sock);
+        activeConnections.push_back(d);
+        //serverThreads.push_back();
     }
 }
 
@@ -31,29 +32,46 @@ void dot::Dot::setReadCallback(std::function<void(Dot, std::string)> callback)
     readCallback = callback;
 }
 
-std::string *dot::Dot::readLinePtr()
+template <class T>
+void dot::Dot::setReadCallback(T *t, void (T::*func)(Dot, std::string))
 {
-    return new std::string(comm_read_text(this->sock));
+    readCallback = std::bind(func, t);
 }
 
-void dot::Dot::serve(Dot dot)
+std::string *dot::Dot::readLinePtr()
+{
+    const char *msg = comm_read_text(this->sock);
+    if (msg == NULL)
+    {
+        return nullptr;
+    }
+    return new std::string(msg);
+}
+
+void dot::Dot::serve()
 {
     std::string *msg;
     while ((msg = this->readLinePtr()) != nullptr)
     {
-        readCallback(dot, *msg);
+        readCallback(*this, *msg);
     }
 }
 
 dot::Dot::Dot(SOCKET sock)
 {
     this->sock = sock;
+    std::thread t = std::thread(&Dot::serve, this);
 }
 
 void dot::Dot::close()
 {
     closeServerFlag = true;
+    for (Dot *dot : activeConnections)
+    {
+        dot->close();
+    }
     activeConnections.clear();
+    std::terminate();
 }
 
 void *dot::Dot::read()
@@ -106,7 +124,7 @@ int dot::Dot::getPortNumber()
 void dot::Dot::connect(std::string hostname, int port)
 {
     SOCKET sock = comm_connect_server(hostname.c_str(), port);
-    activeConnections[sock] = Dot(sock);
+    activeConnections[sock] = new Dot(sock);
 }
 
 void dot::Dot::connect(dot::Dot dot)
