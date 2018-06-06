@@ -6,6 +6,8 @@ dot::Dot::Dot()
 
 dot::Dot::Dot(const dot::Dot &dot)
 {
+    this->sock = dot.sock;
+    this->readCallback = dot.readCallback;
 }
 dot::Dot::~Dot()
 {
@@ -22,8 +24,8 @@ void dot::Dot::listen(int port)
     {
         SOCKET sock = comm_start_server(port);
         Dot *d = new Dot(sock);
-        activeConnections.push_back(d);
-        //serverThreads.push_back();
+        d->setReadCallback(readCallback);
+        d->serve();
     }
 }
 
@@ -60,7 +62,6 @@ void dot::Dot::serve()
 dot::Dot::Dot(SOCKET sock)
 {
     this->sock = sock;
-    std::thread t = std::thread(&Dot::serve, this);
 }
 
 void dot::Dot::close()
@@ -68,10 +69,13 @@ void dot::Dot::close()
     closeServerFlag = true;
     for (Dot *dot : activeConnections)
     {
+        if (dot != nullptr)
+        {
+            dot->close();
+        }
         dot->close();
     }
     activeConnections.clear();
-    std::terminate();
 }
 
 void *dot::Dot::read()

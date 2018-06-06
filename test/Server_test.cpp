@@ -12,7 +12,7 @@ void serve(Dot d, std::string msg)
         server->close();
         return;
     }
-    d.writeLine("OK");
+    std::cout << msg << std::endl;
 }
 
 int main(int argc, char *argv[])
