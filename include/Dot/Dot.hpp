@@ -17,6 +17,11 @@ enum class WriteMode
   NO_WAIT
 };
 
+class DotSnapshot {
+  private:
+  int 
+}
+
 class Dot
 {
 private:
