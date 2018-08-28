@@ -1,0 +1,38 @@
+For the sake of this document the initiator of the connection is called as dot1 and the secon
+use libcomm //for common global sockets
+use EventManager //for events
+
+//asynchronous
+//self managing
+self managing in the sense can handle physical disconnection and queues the read and write
+
+//events
+//dot level events
+connect
+disconnect
+resume
+pause
+//message level events
+read
+write
+
+events should have the snapshot of the dot
+
+//operations
+//dot level operations
+connect
+disconnect
+resume
+//message level operations
+
+
+
+connects to server and proceeds to call event on the client
+
+/*
+
+
+
+int main(){
+Dot d("localhost", 22);
+d.set
