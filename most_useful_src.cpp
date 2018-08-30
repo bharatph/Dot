@@ -3,15 +3,15 @@
 #include <future>
 #include <vector>
 #include <map>
+#include <queue>
 
 namespace em
 {
-template <class Event, class EventCallbackType>
+template <class Event, typename... EventCallbackType>
 class EventManager
 {
   public:
-    typedef std::function<void(EventCallbackType)> EventCallback;
-
+    typedef std::function<void(EventCallbackType...)> EventCallback;
   private:
     std::map<Event, EventCallback> events;
 
@@ -26,18 +26,19 @@ class EventManager
     }
 
     template <class T>
-    void addEventHandler(Event event, T *const object, void (T::*callback)(EventCallbackType))
+    void addEventHandler(Event event, T *const object, void (T::*callback)(EventCallbackType...))
     {
         using namespace std::placeholders;
         events[event] = std::bind(callback, object, _1);
     }
 
-    void fireEvent(Event event, EventCallbackType t)
+protected:
+    void fireEvent(Event event, EventCallbackType... t)
     {
         if (events[event] == nullptr)
             return;
         EventCallback callback = events[event];
-        callback(t);
+        callback(t...);
     }
 };
 }
@@ -50,25 +51,18 @@ enum class DotEvent {
     DISCONNECTED
 };
 
-//Events have states
-//success
-//failed - decribe failure (timeout? no network? network unreachable?)
-//undergoing //can be polled by the user
+class Dot;
 
-enum class DotStateEvent {
-    SUCCESS,
-    FAILED,
-    PROCESSING
-};
-
-class DotState : public em::EventManager<DotStateEvent, const DotState &> {
+class DotEventManager : protected em::EventManager<DotEvent, Dot &> {
     public:
-    std::string val = "idle";
-    DotEvent dotEvent = DotEvent::DISCONNECTED;
-    DotState(){
+    DotEventManager &addDotEventHandler(DotEvent dotEvent, EventCallback eventCallback){
+        addEventHandler(dotEvent, eventCallback);
+        return *this;
     }
 };
 
+
+/*
 class DotProtocol{
     protected:
     bool running = false;
@@ -80,24 +74,95 @@ class DotProtocol{
   virtual void recv() = 0;
   virtual ~DotProtocol() = default;
 };
+*/
 
 
-class Dot : public em::EventManager<DotEvent, const DotState &> {
+
+//Events have states
+//success
+//failed - decribe failure (timeout? no network? network unreachable?)
+//undergoing //can be polled by the user
+enum class DotOperationEvent {
+    SUCCESS,
+    FAILED,
+    PROCESSING
+};
+
+class DotOperation;
+
+class DotOperationEventManager : protected em::EventManager<DotOperationEvent, DotOperation &> {
+    public:
+    void addDotOperationEventHandler(DotOperationEvent DotOperationEvent, EventCallback eventCallback){
+        addEventHandler(DotOperationEvent, eventCallback);
+    }
+};
+
+
+class DotOperation : public DotOperationEventManager {
+    public:
+    DotOperation(){
+
+    }
+    ~DotOperation(){
+        std::cout << "Ending" << std::endl;
+    }
+};
+
+class Writer : public DotOperation{
+    public:
+    typedef int comm_socket; //TODO REMOVE
+    comm_socket sock;
+    Writer(comm_socket sock){
+        this->sock = sock;
+    }
+    DotOperation &write(std::string message){
+        //int bytes_written = comm_write(sockfd, message);
+        //if(bytes_written < 0){
+            fireEvent(DotOperationEvent::FAILED, *this);
+        //} else {
+            fireEvent(DotOperationEvent::SUCCESS, *this);
+        //}
+        return *this;
+    }
+};
+
+class Reader : public DotOperation{
+    public:
+    Reader(){
+    }
+    void read(){
+        //if(error){
+            fireEvent(DotOperationEvent::FAILED, *this);
+        //} else {
+            fireEvent(DotOperationEvent::SUCCESS, *this);
+        //}
+    }
+};
+
+class Dot : public DotEventManager {
     private:
-    std::map<std::string, std::function<void(DotState &)>> reads;
-    std::map<std::string, std::function<void(DotState &)>> writes;
+    typedef int comm_socket; //TODO REMOVE
+    comm_socket _sock;
+
+    std::map<std::string, EventCallback> readForMap;
+    std::queue<DotOperation> incomingQueue;
+    std::queue<DotOperation> outgoingQueue;
+
     std::future<void> runner;
-    void _run(){
+
+    void _init(){
+        //initialize socket structure
+    }
+    void _runnerLoop(){
         //while(1){
-            std::map<std::string, std::function<void(DotState &)>>::iterator it;
-            for(it = reads.begin(); it != reads.end(); ++it){
-                DotState *dotState = new DotState();
-                it->second(*dotState);
+            std::map<std::string, EventCallback>::iterator it;
+            for(it = readForMap.begin(); it != readForMap.end(); ++it){
+                DotOperation *dotOperation = new DotOperation();
+                it->second(*this);
             }
         //}
     }
     protected:
-    DotState ds;
     Dot(){
 
     }
@@ -112,65 +177,81 @@ class Dot : public em::EventManager<DotEvent, const DotState &> {
 
     }
     void connect(std::string host, int port){
-        DotState dotState;
-        dotState.val = "connected";
-        fireEvent(DotEvent::CONNECTED, dotState);
-        _run();
+        //DotOperation dotOperation;
+        //dotState.val = "connected";
+        //int connection = comm_connnect(sockfd);
+        fireEvent(DotEvent::CONNECTED, *this);
+        _runnerLoop();
     }
     void disconnect(){
         //TODO if connected disconnect, else don't bother
-        DotState dotState;
-        dotState.val = "disconnected";
-        fireEvent(DotEvent::DISCONNECTED, dotState);
+        //DotOperation dotOperation;
+        //dotState.val = "disconnected";
+        fireEvent(DotEvent::DISCONNECTED, *this);
     }
-    void write(std::string message, std::function<void(const DotState &)> writeFunc){
+    void resume(){
+        //DotOperation dotOperation;
+        //dotState.val = "resume";
+        fireEvent(DotEvent::RESUME, *this);
+    }
+    Writer &write(std::string message){
         //add to queue and let runner decide whether to run or not
-        DotState dotState;
-        std::cout << "sending: " << message << std::endl;
-        writeFunc(dotState);
+        //DotState dotState;
+        //writeFunc(dotState);
+        Writer &writer = *(new Writer(_sock));
+        outgoingQueue.push(writer.write(message));
+        return writer;
     }
-    void read(std::string message, std::function<void(const DotState &)> readFunc){
-        DotState dotState;
-        reads[message] = readFunc;
+
+
+    Reader &readFor(std::string message, EventCallback readForCallback){
+        Reader *reader = new Reader();
+        readForMap[message] = readForCallback;
+        //reader->read(message);
+        //incoming_queue.push(reader.getOperation());
+        return *reader;
     }
-    void read(std::vector<std::string> messages, std::function<void(const DotState &)> readFunc){
-        DotState dotState;
+    /*
+    Reader &readFor(std::vector<std::string> messages){
+        Reader *reader = new Reader();
         for(std::string message : messages){
             reads[message] = readFunc;
+            reader.read(messages)
         }
+        return *reader;
     }
+    */
 
     void run(){
         //runner = std::async(std::launch::async, &Dot::_run, this);
-        _run();
+        _runnerLoop();
     }
     ~Dot(){
+        std::cout << "Dot ended" << std::endl;
     }
 };
 
 class LightDot : public Dot {
     public:
     LightDot(){
-    addEventHandler(DotEvent::CONNECTED, [](const DotState &dotState){
-        std::cout << dotState.val << std::endl;
+    readFor("hi", [](Dot &dot){
+        dot.write("hello");
     });
-    addEventHandler(DotEvent::DISCONNECTED, [](const DotState &dotState){
-        std::cout << dotState.val << std::endl;
+    readFor("off", [](Dot &dot){
+        dot.write("off");
     });
-    read("hi", [](const DotState &dotState){
-        std::cout << dotState.val << std::endl;
-    });
-    read("off", [](const DotState &dotState){
-        std::cout << "turnedOff" << std::endl;
-    });
-    read("on", [](const DotState &dotState){
-        std::cout << "turnedOn" << std::endl;
+    readFor("on", [](Dot &dot){
+        dot.write("on");
     });
     }
-    DotState &on(){
-        DotState *dotState = new DotState();
-        //write("on", dotState);
-        return *dotState;
+    DotOperation &on(){
+        return write("on");
+    }
+    DotOperation &off(){
+        return write("off");
+    }
+    DotOperation &setLuminous(int val){
+      return write("val+" + val);
     }
 };
 
@@ -180,22 +261,56 @@ enum class SoloState {
 };
 
 //SOLO.cpp
-class SOLO : public em::EventManager<SoloState, int> {
+class SOLO : public em::EventManager<SoloState> {
+    private:
+    void _init(){
+    LightDot lightDot;
+    lightDot.addDotEventHandler(DotEvent::CONNECTED, [](const Dot &dot){
+        std::cout << "connected" << std::endl;
+    }).addDotEventHandler(DotEvent::DISCONNECTED, [](const Dot &dot){
+        std::cout << "disconnected" << std::endl;
+    }).addDotEventHandler(DotEvent::PAUSE, [](const Dot &dot){
+        std::cout << "pause" << std::endl;
+    }).addDotEventHandler(DotEvent::RESUME, [](const Dot &dot){
+        std::cout << "resume" << std::endl;
+    });
+
+    lightDot.on();
+    lightDot.setLuminous(0);
+    lightDot.off()
+        .addDotOperationEventHandler(DotOperationEvent::SUCCESS, [](const DotOperation &){
+            std::cout << "turned OFF successfully" << std::endl;
+        });
+    lightDot.connect("localhost", 22);
+    lightDot.resume();
+    lightDot.disconnect();
+    std::cout << "solo" << std::endl;
+    }
     public:
     SOLO(){
-    LightDot lightDot;
-        lightDot.on()
-            .addEventHandler(DotStateEvent::SUCCESS, [](const DotState &){
-            std::cout << "success" << std::endl;
-        });/*.addEventHandler(DotStateEvent::FAILURE, [](const DotState &){
-            std::cout << "failure" << std::endl;
-        });*/
-    lightDot.connect("localhost", 22);
-    lightDot.disconnect();
+    }
+
+    int run(){
+        //fireEvent()
+        //while(1);
+    fireEvent(SoloState::START);
+        _init();
+        return 0;
+    }
+    ~SOLO(){
+        fireEvent(SoloState::EXIT);
     }
 };
+
+
 //solo.cpp
 int main(int argc, char *argv[]) {
     SOLO solo;
-   return 0;
+    solo.addEventHandler(SoloState::START, [](){
+        std::cout << "started solo" << std::endl;
+    });
+    solo.addEventHandler(SoloState::EXIT, [](){
+        std::cout << "solo killed" << std::endl;
+    });
+   return solo.run();
 }
