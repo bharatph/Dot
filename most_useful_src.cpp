@@ -127,10 +127,14 @@ class Writer : public DotOperation{
 };
 
 class Reader : public DotOperation{
+    private:
+    typedef int comm_socket;
+    comm_socket sock;
     public:
-    Reader(){
+    Reader(comm_socket sock){
+        this->sock = sock;
     }
-    void read(){
+    DotOperation &read(std::string message){
         //if(error){
             fireEvent(DotOperationEvent::FAILED, *this);
         //} else {
@@ -153,8 +157,10 @@ class Dot : public DotEventManager {
     void _init(){
         //initialize socket structure
     }
-    void _runnerLoop(){
+    void _readLoop(){
         //while(1){
+        //TODO std::string received = comm_read(sock);
+        //TODO if received == the following iteration call that function
             std::map<std::string, EventCallback>::iterator it;
             for(it = readForMap.begin(); it != readForMap.end(); ++it){
                 DotOperation *dotOperation = new DotOperation();
@@ -181,7 +187,7 @@ class Dot : public DotEventManager {
         //dotState.val = "connected";
         //int connection = comm_connnect(sockfd);
         fireEvent(DotEvent::CONNECTED, *this);
-        _runnerLoop();
+        _readLoop();
     }
     void disconnect(){
         //TODO if connected disconnect, else don't bother
@@ -203,12 +209,15 @@ class Dot : public DotEventManager {
         return writer;
     }
 
+    Reader &readFor(int binaryFile, std::string fileType, EventCallback readForCallback){
+        Reader *reader = new Reader(0);
+        readForMap[fileType] = readForCallback;
+        return *reader;
+    }
 
     Reader &readFor(std::string message, EventCallback readForCallback){
-        Reader *reader = new Reader();
+        Reader *reader = new Reader(0);
         readForMap[message] = readForCallback;
-        //reader->read(message);
-        //incoming_queue.push(reader.getOperation());
         return *reader;
     }
     /*
@@ -224,7 +233,7 @@ class Dot : public DotEventManager {
 
     void run(){
         //runner = std::async(std::launch::async, &Dot::_run, this);
-        _runnerLoop();
+        _readLoop();
     }
     ~Dot(){
         std::cout << "Dot ended" << std::endl;
@@ -243,6 +252,7 @@ class LightDot : public Dot {
     readFor("on", [](Dot &dot){
         dot.write("on");
     });
+
     }
     DotOperation &on(){
         return write("on");
@@ -284,15 +294,13 @@ class SOLO : public em::EventManager<SoloState> {
     lightDot.connect("localhost", 22);
     lightDot.resume();
     lightDot.disconnect();
-    std::cout << "solo" << std::endl;
     }
     public:
     SOLO(){
     }
 
     int run(){
-        //fireEvent()
-        //while(1);
+    //todo while(1);
     fireEvent(SoloState::START);
         _init();
         return 0;
@@ -302,15 +310,21 @@ class SOLO : public em::EventManager<SoloState> {
     }
 };
 
+int exit_handler(int sigevent){
+    std::cout << "solo killed" << std::endl;
+    exit(sigevent);
+}
+
 
 //solo.cpp
 int main(int argc, char *argv[]) {
+    //register exit event
     SOLO solo;
     solo.addEventHandler(SoloState::START, [](){
         std::cout << "started solo" << std::endl;
     });
     solo.addEventHandler(SoloState::EXIT, [](){
-        std::cout << "solo killed" << std::endl;
+        exit_handler(0);
     });
    return solo.run();
 }
