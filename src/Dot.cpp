@@ -1,145 +1,81 @@
 #include <Dot/Dot.hpp>
-
-dot::Dot::Dot()
-{
-}
-
-dot::Dot::Dot(const dot::Dot &dot)
-{
-    this->sock = dot.sock;
-    this->readCallback = dot.readCallback;
-}
-dot::Dot::~Dot()
-{
-    this->close();
-}
-
-void dot::Dot::response(std::string requestMessage, std::function<void(Dot)> responseFunc)
-{
-}
-
-void dot::Dot::listen(int port)
-{
-    while (closeServerFlag == false)
-    {
-        SOCKET sock = comm_start_server(port);
-        Dot *d = new Dot(sock);
-        d->setReadCallback(readCallback);
-        d->serve();
+    dot::Dot::comm_socket dot::Dot::getSocket(){
+        return _sock;
     }
-}
 
-void dot::Dot::setReadCallback(std::function<void(Dot, std::string)> callback)
-{
-    readCallback = callback;
-}
-
-template <class T>
-void dot::Dot::setReadCallback(T *t, void (T::*func)(Dot, std::string))
-{
-    readCallback = std::bind(func, t);
-}
-
-std::string *dot::Dot::readLinePtr()
-{
-    const char *msg = comm_read_text(this->sock);
-    if (msg == NULL)
-    {
-        return nullptr;
+    void dot::Dot::_init(){
+        //initialize socket structure
     }
-    return new std::string(msg);
-}
-
-void dot::Dot::serve()
-{
-    std::string *msg;
-    while ((msg = this->readLinePtr()) != nullptr)
-    {
-        readCallback(*this, *msg);
+    void dot::Dot::_readLoop(){
+        //while(1){
+        //TODO std::string received = comm_read(sock);
+        //TODO if received == the following iteration call that function
+            std::map<std::string, EventCallback>::iterator it;
+            for(it = readForMap.begin(); it != readForMap.end(); ++it){
+                DotOperation *dotOperation = new DotOperation();
+                it->second(*this);
+            }
+        //}
     }
-}
+    dot::Dot::Dot(){
 
-dot::Dot::Dot(SOCKET sock)
-{
-    this->sock = sock;
-}
+    }
+    dot::Dot::Dot(const Dot &dot){
 
-void dot::Dot::close()
-{
-    closeServerFlag = true;
-    for (Dot *dot : activeConnections)
-    {
-        if (dot != nullptr)
-        {
-            dot->close();
+    }
+    void dot::Dot::connect(std::string host, int port){
+        //DotOperation dotOperation;
+        //dotState.val = "connected";
+        //int connection = comm_connnect(sockfd);
+        fireEvent(DotEvent::CONNECTED, *this);
+        _readLoop();
+    }
+    void dot::Dot::disconnect(){
+        //TODO if connected disconnect, else don't bother
+        //DotOperation dotOperation;
+        //dotState.val = "disconnected";
+        fireEvent(DotEvent::DISCONNECTED, *this);
+    }
+    void dot::Dot::resume(){
+        //DotOperation dotOperation;
+        //dotState.val = "resume";
+        fireEvent(DotEvent::RESUME, *this);
+    }
+    dot::Writer &dot::Dot::write(std::string message){
+        //add to queue and let runner decide whether to run or not
+        //DotState dotState;
+        //writeFunc(dotState);
+        Writer &writer = *(new Writer(this));
+        outgoingQueue.push(writer.write(message));
+        return writer;
+    }
+
+    dot::Reader &dot::Dot::readFor(int binaryFile, std::string fileType){
+        Reader &reader = *(new Reader(this));
+        //readForMap[fileType] = readForCallback;
+        return reader.read(fileType);
+    }
+
+    dot::Reader &dot::Dot::readFor(std::string message){
+        Reader &reader = *(new Reader(this));
+        //readForMap[message] = readForCallback;
+        return reader.read(message);
+    }
+    /*
+    Reader &readFor(std::vector<std::string> messages){
+        Reader *reader = new Reader();
+        for(std::string message : messages){
+            reads[message] = readFunc;
+            reader.read(messages)
         }
-        dot->close();
+        return *reader;
     }
-    activeConnections.clear();
-}
+    */
 
-void *dot::Dot::read()
-{
-}
-
-std::string dot::Dot::readLine()
-{
-    std::string *msg = this->readLinePtr();
-    if (msg == nullptr)
-    {
-        return std::string();
+    void dot::Dot::run(){
+        //runner = std::async(std::launch::async, &Dot::_run, this);
+        _readLoop();
     }
-    return *msg;
-}
-
-void dot::Dot::write(std::string msg, WriteMode writeMode)
-{
-    switch (writeMode)
-    {
-    case WriteMode::WAIT_UNTIL_CONNECTION:
-        break;
-    case WriteMode::NO_WAIT:
-        break;
+    dot::Dot::~Dot(){
+        std::cout << "Dot ended" << std::endl;
     }
-}
-
-void dot::Dot::writeLine(std::string msg, WriteMode writeMode)
-{
-    comm_write_text(this->sock, msg.c_str());
-    switch (writeMode)
-    {
-    case WriteMode::WAIT_UNTIL_CONNECTION:
-        break;
-    case WriteMode::NO_WAIT:
-        break;
-    }
-}
-
-std::string dot::Dot::getHostname()
-{
-    return hostname;
-}
-
-int dot::Dot::getPortNumber()
-{
-    return port;
-}
-
-void dot::Dot::connect(std::string hostname, int port)
-{
-    SOCKET sock = comm_connect_server(hostname.c_str(), port);
-    activeConnections[sock] = new Dot(sock);
-}
-
-void dot::Dot::connect(dot::Dot dot)
-{
-    connect(dot.getHostname(), dot.getPortNumber());
-}
-
-void dot::Dot::connect(std::vector<dot::Dot> dots)
-{
-    for (const Dot &dot : dots)
-    {
-        this->connect(dot);
-    }
-}

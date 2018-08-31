@@ -3,61 +3,45 @@
 
 #include <iostream>
 #include <thread>
+#include <functional>
+#include <future>
 #include <vector>
 #include <map>
-#include <functional>
+#include <queue>
 
+#include <Dot/DotEventManager.hpp>
+#include <Dot/DotOperation.hpp>
+#include <Dot/Reader.hpp>
+#include <Dot/Writer.hpp>
+
+extern "C" {
 #include <comm/comm.h>
-
-namespace dot
-{
-enum class WriteMode
-{
-  WAIT_UNTIL_CONNECTION,
-  NO_WAIT
-};
-
-class DotSnapshot {
-  private:
-  int 
 }
 
-class Dot
-{
-private:
-  bool closeServerFlag = false;
-  std::string hostname;
-  int port;
-  std::function<void(Dot, std::string)> readCallback;
-  std::vector<Dot *> activeConnections;
-  SOCKET sock;
-  Dot(SOCKET sock);
-  void serve();
-
-public:
-  Dot();
-  Dot(const Dot &dot);
-  ~Dot();
-  //binary read
-  void *read();
-  //text read
-  std::string readLine();
-  std::string *readLinePtr();
-  std::string getHostname();
-  void setReadCallback(std::function<void(Dot, std::string)>);
-  template <class T>
-  void setReadCallback(T *t, void (T::*func)(Dot, std::string));
-  int getPortNumber();
-  std::vector<std::thread *> serverThreads;
-  void write(std::string msg, WriteMode writeMode = WriteMode::WAIT_UNTIL_CONNECTION);
-  void writeLine(std::string msg, WriteMode writeMode = WriteMode::WAIT_UNTIL_CONNECTION);
-  void response(std::string requestMessage, std::function<void(Dot)> responseFunction);
-  void listen(int port);
-
-  void connect(std::string hostname, int port);
-  void connect(Dot dot);
-  void connect(std::vector<Dot> dots);
-  void close();
+namespace dot {
+class Dot : public DotEventManager {
+    private:
+    typedef int comm_socket; //TODO REMOVE
+    comm_socket _sock;
+    std::map<std::string, EventCallback> readForMap;
+    std::queue<DotOperation> incomingQueue;
+    std::queue<DotOperation> outgoingQueue;
+    comm_socket getSocket();
+    std::future<void> runner;
+    void _init();
+    void _readLoop();
+    protected:
+    public:
+    Dot();
+    Dot(const Dot &dot);
+    void connect(std::string host, int port);
+    void disconnect();
+    void resume();
+    Writer &write(std::string message);
+    Reader &readFor(int binaryFile, std::string fileType);
+    Reader &readFor(std::string message);
+    void run();
+    ~Dot();
 };
 }
 #endif
