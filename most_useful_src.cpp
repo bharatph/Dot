@@ -90,10 +90,11 @@ enum class DotOperationEvent {
 
 class DotOperation;
 
-class DotOperationEventManager : protected em::EventManager<DotOperationEvent, DotOperation &> {
+class DotOperationEventManager : protected em::EventManager<DotOperationEvent, Dot &> {
     public:
-    void addDotOperationEventHandler(DotOperationEvent DotOperationEvent, EventCallback eventCallback){
+    DotOperationEventManager &addDotOperationEventHandler(DotOperationEvent DotOperationEvent, EventCallback eventCallback){
         addEventHandler(DotOperationEvent, eventCallback);
+        return *this;
     }
 };
 
@@ -108,38 +109,40 @@ class DotOperation : public DotOperationEventManager {
     }
 };
 
+//sends message, after callback is completed destroys itself
 class Writer : public DotOperation{
     public:
-    typedef int comm_socket; //TODO REMOVE
-    comm_socket sock;
-    Writer(comm_socket sock){
-        this->sock = sock;
+    Dot *dot;
+    Writer(Dot *dot){
+        this->dot = dot;
     }
     DotOperation &write(std::string message){
         //int bytes_written = comm_write(sockfd, message);
         //if(bytes_written < 0){
-            fireEvent(DotOperationEvent::FAILED, *this);
+            //fireEvent(DotOperationEvent::FAILED, *dot, *this);
         //} else {
-            fireEvent(DotOperationEvent::SUCCESS, *this);
+            //fireEvent(DotOperationEvent::SUCCESS, *dot, *this );
         //}
         return *this;
     }
 };
 
+//unlike Writer, Reader does not get destroyed unless explicity mentioned
 class Reader : public DotOperation{
     private:
-    typedef int comm_socket;
-    comm_socket sock;
+    Dot *dot;
+    //get socket from dot
     public:
-    Reader(comm_socket sock){
-        this->sock = sock;
+    Reader(Dot *dot){
+        this->dot = dot;
     }
-    DotOperation &read(std::string message){
+    Reader &read(std::string message){
         //if(error){
-            fireEvent(DotOperationEvent::FAILED, *this);
+            //fireEvent(DotOperationEvent::FAILED, *dot, *this);
         //} else {
-            fireEvent(DotOperationEvent::SUCCESS, *this);
+            //fireEvent(DotOperationEvent::SUCCESS, *dot, *this);
         //}
+        return *this;
     }
 };
 
@@ -151,6 +154,10 @@ class Dot : public DotEventManager {
     std::map<std::string, EventCallback> readForMap;
     std::queue<DotOperation> incomingQueue;
     std::queue<DotOperation> outgoingQueue;
+
+    comm_socket getSocket(){
+        return _sock;
+    }
 
     std::future<void> runner;
 
@@ -204,21 +211,21 @@ class Dot : public DotEventManager {
         //add to queue and let runner decide whether to run or not
         //DotState dotState;
         //writeFunc(dotState);
-        Writer &writer = *(new Writer(_sock));
+        Writer &writer = *(new Writer(this));
         outgoingQueue.push(writer.write(message));
         return writer;
     }
 
-    Reader &readFor(int binaryFile, std::string fileType, EventCallback readForCallback){
-        Reader *reader = new Reader(0);
-        readForMap[fileType] = readForCallback;
-        return *reader;
+    Reader &readFor(int binaryFile, std::string fileType){
+        Reader &reader = *(new Reader(this));
+        //readForMap[fileType] = readForCallback;
+        return reader.read(fileType);
     }
 
-    Reader &readFor(std::string message, EventCallback readForCallback){
-        Reader *reader = new Reader(0);
-        readForMap[message] = readForCallback;
-        return *reader;
+    Reader &readFor(std::string message){
+        Reader &reader = *(new Reader(this));
+        //readForMap[message] = readForCallback;
+        return reader.read(message);
     }
     /*
     Reader &readFor(std::vector<std::string> messages){
@@ -243,17 +250,19 @@ class Dot : public DotEventManager {
 class LightDot : public Dot {
     public:
     LightDot(){
-    readFor("hi", [](Dot &dot){
+    readFor("hi").addDotOperationEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot){
         dot.write("hello");
     });
+    /*
     readFor("off", [](Dot &dot){
         dot.write("off");
     });
     readFor("on", [](Dot &dot){
         dot.write("on");
     });
-
+    */
     }
+
     DotOperation &on(){
         return write("on");
     }
@@ -288,7 +297,7 @@ class SOLO : public em::EventManager<SoloState> {
     lightDot.on();
     lightDot.setLuminous(0);
     lightDot.off()
-        .addDotOperationEventHandler(DotOperationEvent::SUCCESS, [](const DotOperation &){
+        .addDotOperationEventHandler(DotOperationEvent::SUCCESS, [](const Dot &){
             std::cout << "turned OFF successfully" << std::endl;
         });
     lightDot.connect("localhost", 22);
