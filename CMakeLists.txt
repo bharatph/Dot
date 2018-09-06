@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(Dot VERSION 0.1 LANGUAGES CXX DESCRIPTION "Asynchronous Networking library for C++")
 find_package(Threads)
-file(GLOB_RECURSE Dot_HDRS "include/*hpp")
+file(GLOB_RECURSE Dot_HDRS "include/*.hpp")
 file(GLOB_RECURSE Dot_SRCS "src/*.cpp")
 
 #configure_file( ${PROJECT_SOURCE_DIR}/config.h.in ${PROJECT_SOURCE_DIR}/config.h)

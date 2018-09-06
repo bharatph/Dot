@@ -3,14 +3,17 @@
 
 #include <em/EventManager.hpp>
 #include <Dot/DotOperationEvent.hpp>
-#include <Dot/Dot.hpp>
 
-namespace dot {
+namespace dot
+{
 class DotOperation;
+class Dot;
 
-class DotOperationEventManager : protected em::EventManager<DotOperationEvent, Dot &> {
-    public:
-    DotOperationEventManager &addDotOperationEventHandler(DotOperationEvent DotOperationEvent, EventCallback eventCallback){
+class DotOperationEventManager : protected em::EventManager<DotOperationEvent, Dot &>
+{
+  public:
+    DotOperationEventManager &addDotOperationEventHandler(DotOperationEvent DotOperationEvent, EventCallback eventCallback)
+    {
         addEventHandler(DotOperationEvent, eventCallback);
         return *this;
     }
