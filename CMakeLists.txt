@@ -19,8 +19,8 @@ endif()
 set_target_properties(Dot PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(Dot PUBLIC include)
 
+install(FILES DotConfig.cmake DESTINATION lib/cmake/Dot)
 install(FILES ${Dot_HDRS} DESTINATION include/Dot)
-
 install(TARGETS Dot
         PUBLIC_HEADER DESTINATION include/Dot
         ARCHIVE DESTINATION lib
