@@ -6,9 +6,7 @@
 
 namespace dot
 {
-class DotOperation;
-class Dot;
-
+  class Dot;
 class DotOperationEventManager : protected em::EventManager<DotOperationEvent, Dot &>
 {
   public:

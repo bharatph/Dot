@@ -5,6 +5,7 @@
 
 namespace dot
 {
+  class DotOperation;
 class Reader : public DotOperation
 {
   private:

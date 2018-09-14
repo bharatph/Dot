@@ -5,7 +5,14 @@ using namespace dot;
 
 int main(int argc, char *argv[])
 {
-    Dot &server = *(new Dot());
-    server.connect("localhost", 22);
+    Dot &server = Dot::getDot();
+    server.connect("localhost", 3500);
+    server.write("hello").addDotOperationEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot){
+      std::cout << "written" << '\n';
+    });
+    server.readFor("hi").addDotOperationEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot){
+      std::cout << "read message" << '\n';
+    });
+    while(1);
     return 0;
 }

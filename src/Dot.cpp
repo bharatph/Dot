@@ -1,5 +1,8 @@
 #include <Dot/Dot.hpp>
-    dot::Dot::comm_socket dot::Dot::getSocket(){
+
+    dot::Dot *dot::Dot::instance = nullptr;
+
+    comm_socket dot::Dot::getSocket(){
         return _sock;
     }
 
@@ -18,15 +21,23 @@
         //}
     }
     dot::Dot::Dot(){
-
     }
     dot::Dot::Dot(const Dot &dot){
 
     }
+
+    dot::Dot &dot::Dot::getDot(){
+      if(instance == nullptr){
+        instance = new Dot();
+      }
+      return *instance;
+    }
+
     void dot::Dot::connect(std::string host, int port){
         //DotOperation dotOperation;
         //dotState.val = "connected";
         //int connection = comm_connnect(sockfd);
+        comm_connect_server(host.c_str(), port);
         fireEvent(DotEvent::CONNECTED, *this);
         _readLoop();
     }
