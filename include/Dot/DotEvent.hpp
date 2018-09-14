@@ -3,6 +3,7 @@
 namespace dot {
   //Dot level event
   enum class DotEvent {
+    ERROR,
       CONNECTED,
       RESUME,
       PAUSE,

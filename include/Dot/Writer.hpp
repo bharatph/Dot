@@ -10,11 +10,13 @@ class Writer : public DotOperation
 {
 private:
   Dot *dot;
+  std::string _message;
 
 public:
   Writer();
   Writer(Dot *dot);
   Writer &write(std::string message);
+  void notify(std::string) override;
 };
 }
 #endif

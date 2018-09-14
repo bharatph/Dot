@@ -1,4 +1,8 @@
 #include <Dot/Dot.hpp>
+#include <Dot/ReadLooper.hpp>
+#include <future>
+
+    static const char *TAG = "Dot";
 
     dot::Dot *dot::Dot::instance = nullptr;
 
@@ -21,6 +25,11 @@
         //}
     }
     dot::Dot::Dot(){
+      //run with defualt port
+      //_sock = comm_start_server(3500);
+      fut = std::async (std::launch::async, comm_start_server,3500);
+      readLooper = &ReadLooper::getReadLooper(fut.get());
+      //readLooper->run();//TODO non-blocking
     }
     dot::Dot::Dot(const Dot &dot){
 
@@ -29,23 +38,30 @@
     dot::Dot &dot::Dot::getDot(){
       if(instance == nullptr){
         instance = new Dot();
+
       }
       return *instance;
     }
 
-    void dot::Dot::connect(std::string host, int port){
+    dot::Dot &dot::Dot::connect(std::string host, int port){
         //DotOperation dotOperation;
         //dotState.val = "connected";
         //int connection = comm_connnect(sockfd);
-        comm_connect_server(host.c_str(), port);
+        _sock = comm_connect_server(host.c_str(), port);
         fireEvent(DotEvent::CONNECTED, *this);
         _readLoop();
+        return (*this);
     }
     void dot::Dot::disconnect(){
         //TODO if connected disconnect, else don't bother
         //DotOperation dotOperation;
         //dotState.val = "disconnected";
-        fireEvent(DotEvent::DISCONNECTED, *this);
+        if( comm_close_socket(_sock) < 0){
+          //print error
+          fireEvent(DotEvent::ERROR, *this);
+          return;
+      }
+      fireEvent(DotEvent::DISCONNECTED, *this);
     }
     void dot::Dot::resume(){
         //DotOperation dotOperation;
@@ -83,9 +99,11 @@
     }
     */
 
-    void dot::Dot::run(){
+    int dot::Dot::run(){
         //runner = std::async(std::launch::async, &Dot::_run, this);
-        _readLoop();
+        //_readLoop();
+        readLooper->run();
+        return 0;
     }
     dot::Dot::~Dot(){
         std::cout << "Dot ended" << std::endl;

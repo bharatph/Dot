@@ -8,6 +8,7 @@ class DotOperation : public DotOperationEventManager {
     public:
     DotOperation();
     ~DotOperation();
+    virtual void notify(std::string);
 };
 }
 
