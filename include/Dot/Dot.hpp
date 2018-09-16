@@ -26,7 +26,7 @@ class Dot : public DotEventManager {
     comm_socket _sock;
     static Dot *instance;
     ReadLooper *readLooper;
-    std::future<int> fut;
+    std::future<comm_socket> fut;
     std::map<std::string, EventCallback> readForMap;
     std::queue<DotOperation> incomingQueue;
     std::queue<DotOperation> outgoingQueue;
@@ -39,7 +39,7 @@ class Dot : public DotEventManager {
     public:
     static Dot &getDot();
     Dot &connect(std::string host, int port);
-    void disconnect();
+    Dot &disconnect();
     void resume();
     comm_socket getSocket();
     Writer &write(std::string message);

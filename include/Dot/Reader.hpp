@@ -19,6 +19,7 @@ class Reader : public DotOperation
     Reader();
     Reader(Dot *dot);
     Reader &read(std::string message);
+    std::string getMessage();
     void notify(std::string) override; //TODO add timestamp with message
 };
 }

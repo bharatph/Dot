@@ -27,7 +27,7 @@
     dot::Dot::Dot(){
       //run with defualt port
       //_sock = comm_start_server(3500);
-      fut = std::async (std::launch::async, comm_start_server,3500);
+      fut = std::async (std::launch::async, comm_start_server, 3500);
       readLooper = &ReadLooper::getReadLooper(fut.get());
       //readLooper->run();//TODO non-blocking
     }
@@ -38,7 +38,6 @@
     dot::Dot &dot::Dot::getDot(){
       if(instance == nullptr){
         instance = new Dot();
-
       }
       return *instance;
     }
@@ -52,16 +51,17 @@
         _readLoop();
         return (*this);
     }
-    void dot::Dot::disconnect(){
+    dot::Dot &dot::Dot::disconnect(){
         //TODO if connected disconnect, else don't bother
         //DotOperation dotOperation;
         //dotState.val = "disconnected";
         if( comm_close_socket(_sock) < 0){
           //print error
           fireEvent(DotEvent::ERROR, *this);
-          return;
+          return *this;
       }
       fireEvent(DotEvent::DISCONNECTED, *this);
+      return *this;
     }
     void dot::Dot::resume(){
         //DotOperation dotOperation;

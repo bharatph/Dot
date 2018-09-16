@@ -37,8 +37,15 @@ while(shouldRun){
   } else if (stat == 0){
     shouldRun = false;
   }
+  int line_no = 0;
+  if(buffer == NULL)continue;
+  char **lines = read_line(&line_no, buffer);
+  if(lines == NULL)continue;
+  if(line_no < 1)continue;
   for(Reader *reader : registeredReaders){
-    reader->notify(buffer);
+    if(strstr(lines[0], reader->getMessage().c_str()) != NULL){
+      reader->notify(buffer);//FIXEME send timestamp instead of string
+    }
   }
   //TODO read until a \r\n or \r or \n hits
     //reader.notify(buffer);
