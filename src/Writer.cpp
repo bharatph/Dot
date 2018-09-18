@@ -17,8 +17,7 @@ dot::Writer::Writer(Dot *dot)
 dot::Writer &dot::Writer::write(std::string message)
 {
     //comm_write_text(dot->getSocket(), message.c_str(), message.en);
-    log_inf(TAG, "writing");
-    ::write(dot->getSocket(), message.c_str(), message.length());
+    dot->write(message, message.length());
     //int bytes_written = comm_write(sockfd, message);
     //if(bytes_written < 0){
     //fireEvent(DotOperationEvent::FAILED, *dot, *this);

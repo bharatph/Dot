@@ -28,7 +28,8 @@
       //run with defualt port
       //_sock = comm_start_server(3500);
       fut = std::async (std::launch::async, comm_start_server, 3500);
-      readLooper = &ReadLooper::getReadLooper(fut.get());
+      _sock = fut.get();
+      readLooper = &ReadLooper::getReadLooper(_sock);
       //readLooper->run();//TODO non-blocking
     }
     dot::Dot::Dot(const Dot &dot){
@@ -88,6 +89,16 @@
         //readForMap[message] = readForCallback;
         return reader.read(message);
     }
+
+    int dot::Dot::read(void *buffer, size_t length){
+      return ::recv(_sock, buffer, length, 0);
+    }
+
+    int dot::Dot::write(std::string buffer, size_t length){
+      char *temp = (char *)calloc(sizeof(char), length);
+      strcpy(temp, buffer.c_str());
+      return ::send(_sock, temp, length, 0);
+    }
     /*
     Reader &readFor(std::vector<std::string> messages){
         Reader *reader = new Reader();
@@ -102,7 +113,7 @@
     int dot::Dot::run(){
         //runner = std::async(std::launch::async, &Dot::_run, this);
         //_readLoop();
-        readLooper->run();
+        readLooper->run(*this);
         return 0;
     }
     dot::Dot::~Dot(){

@@ -43,6 +43,8 @@ class Dot : public DotEventManager {
     void resume();
     comm_socket getSocket();
     Writer &write(std::string message);
+    int write(std::string, size_t);
+    int read(void *, size_t);
     Reader &readFor(int binaryFile, std::string fileType);
     Reader &readFor(std::string message);
     int run();

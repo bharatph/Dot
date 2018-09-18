@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     });
     server.readFor("hello").addDotOperationEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot){
       std::cout << "hello read" << '\n';
+      dot.write("hello back");
     });
     return server.run();
 }

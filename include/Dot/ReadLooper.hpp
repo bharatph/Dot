@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <Dot/Reader.hpp>
+class ReadLooper;
+#include <Dot/Dot.hpp>
 
 extern "C" {
   #include <comm.h>
@@ -24,8 +26,8 @@ private:
 public:
   static ReadLooper &getReadLooper(comm_socket);
   static ReadLooper &getReadLooper();
-  void run();
-  void stop();
+  void run(Dot &);
+  void stop(Dot &);
   void registerReader(Reader &);
 };
 }
