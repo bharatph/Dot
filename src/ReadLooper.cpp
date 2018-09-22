@@ -1,32 +1,30 @@
 #include <Dot/ReadLooper.hpp>
+#include <Dot/Reader.hpp>
+#include <Dot/Dot.hpp>
 
 extern "C" {
   #include <clog.h>
+  #include <comm.h>
 }
 
 static const char *TAG = "ReadLooper";
 
-dot::ReadLooper *dot::ReadLooper::instance = nullptr;
-//comm_socket dot::ReadLooper::_sock = -1;
 
 dot::ReadLooper::ReadLooper(){
 
 }
+dot::ReadLooper::ReadLooper(Dot *dot) : dot(dot){
 
-dot::ReadLooper &dot::ReadLooper::getReadLooper(){
-  if(instance == nullptr){
-    instance = new ReadLooper();
-  }
-  return *instance;
 }
 
+
 //use libev insted to read
-void dot::ReadLooper::run(Dot &dot){
+void dot::ReadLooper::run(){
   shouldRun = true;
 while(shouldRun){
   //read the main socket in regular intervals
   char *buffer = (char *)calloc(sizeof(char), 1024);
-  int stat = dot.read(buffer, 20);
+  int stat = recv(dot->getSocket(), buffer, 20, 0);
   if(stat < 0){
     log_err(TAG, "Error reading");
     shouldRun = false;
@@ -48,7 +46,7 @@ while(shouldRun){
 }
 }
 
-void dot::ReadLooper::stop(Dot &dot){
+void dot::ReadLooper::stop(){
   shouldRun = false;
 
 }

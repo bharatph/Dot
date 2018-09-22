@@ -17,19 +17,14 @@ dot::Writer::Writer(Dot *dot)
 dot::Writer &dot::Writer::write(std::string message)
 {
     //comm_write_text(dot->getSocket(), message.c_str(), message.en);
-    dot->write(message, message.length());
-    //int bytes_written = comm_write(sockfd, message);
-    //if(bytes_written < 0){
-    //fireEvent(DotOperationEvent::FAILED, *dot, *this);
-    //} else {
-    //fireEvent(DotOperationEvent::SUCCESS, *dot, *this );
-    //}
+
+      char *temp = strdup(message.c_str());
+      int wrote = ::send(dot->getSocket(), temp, message.length(), 0); //TODO use libcomm to support atomic functions
+      if(wrote < 1){
+        log_err(TAG, "Opeation failed");
+        fireEvent(DotOperationEvent::FAILED, *dot);
+      } else {
+        fireEvent(DotOperationEvent::SUCCESS, *dot);
+      }
     return *this;
-}
-
-
-void dot::Writer::notify(std::string message){
-  if(message == _message){
-    fireEvent(DotOperationEvent::SUCCESS, *dot);
-  }
 }

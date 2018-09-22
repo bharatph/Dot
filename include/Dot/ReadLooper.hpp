@@ -3,8 +3,6 @@
 
 #include <vector>
 #include <Dot/Reader.hpp>
-class ReadLooper;
-#include <Dot/Dot.hpp>
 
 extern "C" {
   #include <comm.h>
@@ -18,16 +16,15 @@ namespace dot {
    */
 class ReadLooper{
 private:
-  static ReadLooper *instance;
+  Dot *dot;
   bool shouldRun = false;
   std::vector<Reader *> registeredReaders;
-    ReadLooper();
+protected:
+  ReadLooper();
 public:
-  comm_socket _sock;
-  static ReadLooper &getReadLooper(comm_socket);
-  static ReadLooper &getReadLooper();
-  void run(Dot &);
-  void stop(Dot &);
+  ReadLooper(Dot *dot);
+  void run();
+  void stop();
   void registerReader(Reader &);
 };
 }

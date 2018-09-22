@@ -16,7 +16,6 @@ public:
   Writer();
   Writer(Dot *dot);
   Writer &write(std::string message);
-  void notify(std::string) override;
 };
 }
 #endif

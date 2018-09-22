@@ -1,10 +1,12 @@
 #ifndef _DOT_OPERATION_H
 #define _DOT_OPERATION_H
 
-#include <Dot/DotOperationEventManager.hpp>
+#include <em/EventManager.hpp>
+#include <Dot/DotOperationEvent.hpp>
 
 namespace dot {
-class DotOperation : public DotOperationEventManager {
+  class Dot;
+class DotOperation : public em::EventManager<DotOperationEvent, Dot &> {
     public:
     DotOperation();
     ~DotOperation();

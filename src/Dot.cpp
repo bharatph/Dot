@@ -1,46 +1,47 @@
 #include <Dot/Dot.hpp>
+
+#include <Dot/DotOperation.hpp>
 #include <Dot/ReadLooper.hpp>
+#include <Dot/Reader.hpp>
+#include <Dot/Writer.hpp>
+
 #include <future>
 
     static const char *TAG = "Dot";
 
     dot::Dot *dot::Dot::instance = nullptr;
 
+
     comm_socket dot::Dot::getSocket(){
-        return _sock;
+        return current_sock;
     }
-
-    void dot::Dot::_init(){
-        //initialize socket structure
-    }
-    void dot::Dot::_readLoop(){
-        //while(1){
-        //TODO std::string received = comm_read(sock);
-        //TODO if received == the following iteration call that function
-            std::map<std::string, EventCallback>::iterator it;
-            for(it = readForMap.begin(); it != readForMap.end(); ++it){
-                DotOperation *dotOperation = new DotOperation();
-                it->second(*this);
-            }
-        //}
-    }
-
 
     dot::Dot::Dot(){
-      readLooper = &ReadLooper::getReadLooper();
       //readLooper->run();//TODO non-blocking
       serverThread = new std::thread ([&](){
         //run with defualt port
-          _sock = comm_start_server(3500);
-          if(_sock < 1){
+        while(1){
+          comm_socket sock = comm_start_server(3500);
+          if(sock < 1){
             fireEvent(DotEvent::DISCONNECTED, *this);
             return;
           }
-          fireEvent(DotEvent::CONNECTED, *this);
-          readLooper->_sock = _sock;
-          readLooper->run(*this);
+          Dot *dot = new Dot(sock);
+          connectedDots.push_back(dot);
+          fireEvent(DotEvent::CONNECTED, *dot);
+        }
       });
     }
+
+    dot::Dot::Dot(comm_socket sock){
+      this->current_sock = sock;
+      readLooper = new ReadLooper(this);
+    }
+
+    dot::ReadLooper &dot::Dot::getReadLooper(){
+      return *readLooper;
+    }
+
 
     dot::Dot::Dot(const Dot &dot){
 
@@ -57,16 +58,21 @@
         //DotOperation dotOperation;
         //dotState.val = "connected";
         //int connection = comm_connnect(sockfd);
-        _sock = comm_connect_server(host.c_str(), port);
-        fireEvent(DotEvent::CONNECTED, *this);
-        _readLoop();
+        comm_socket sock = comm_connect_server(host.c_str(), port);
+        if(sock < 1){
+          log_err(_DOT, "Connection failed");
+          fireEvent(DotEvent::DISCONNECTED, *this);
+        }
+        Dot *dot = new Dot(sock);
+        connectedDots.push_back(dot);
+        fireEvent(DotEvent::CONNECTED, *dot);
         return (*this);
     }
     dot::Dot &dot::Dot::disconnect(){
         //TODO if connected disconnect, else don't bother
         //DotOperation dotOperation;
         //dotState.val = "disconnected";
-        if( comm_close_socket(_sock) < 0){
+        if( comm_close_socket(current_sock) < 0){
           //print error
           fireEvent(DotEvent::ERROR, *this);
           return *this;
@@ -100,15 +106,6 @@
         return reader.read(message);
     }
 
-    int dot::Dot::read(void *buffer, size_t length){
-      return ::recv(_sock, buffer, length, 0);
-    }
-
-    int dot::Dot::write(std::string buffer, size_t length){
-      char *temp = (char *)calloc(sizeof(char), length);
-      strcpy(temp, buffer.c_str());
-      return ::send(_sock, temp, length, 0);
-    }
     /*
     Reader &readFor(std::vector<std::string> messages){
         Reader *reader = new Reader();

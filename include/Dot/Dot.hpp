@@ -9,10 +9,9 @@
 #include <map>
 #include <queue>
 
+#include <Dot/DotEvent.hpp>
 #include <Dot/Reader.hpp>
 #include <Dot/Writer.hpp>
-#include <Dot/DotOperation.hpp>
-#include <Dot/DotEventManager.hpp>
 #include <Dot/ReadLooper.hpp>
 
 extern "C" {
@@ -21,11 +20,13 @@ extern "C" {
 }
 
 namespace dot {
-class Dot : public DotEventManager {
+
+class Dot : public em::EventManager<DotEvent, Dot &> {
     private:
+    comm_socket current_sock;
+    std::vector<Dot *> connectedDots;
     static Dot *instance;
     ReadLooper *readLooper;
-    std::future<comm_socket> fut;
     std::map<std::string, EventCallback> readForMap;
     std::queue<DotOperation> incomingQueue;
     std::queue<DotOperation> outgoingQueue;
@@ -39,15 +40,16 @@ class Dot : public DotEventManager {
     protected:
 
     public:
-    comm_socket _sock;
+    Dot(comm_socket);
+    //returns the dot of the current system
     static Dot &getDot();
     Dot &connect(std::string host, int port);
     Dot &disconnect();
     void resume();
     comm_socket getSocket();
+    ReadLooper &getReadLooper();
     Writer &write(std::string message);
-    int write(std::string, size_t);
-    int read(void *, size_t);
+    Reader &read();
     Reader &readFor(int binaryFile, std::string fileType);
     Reader &readFor(std::string message);
     int run();

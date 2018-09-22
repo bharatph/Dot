@@ -5,7 +5,7 @@
 
 namespace dot
 {
-  class DotOperation;
+  class Dot;
   /*
    * Reader acts as a "Handler" for ReadLooper
    */
