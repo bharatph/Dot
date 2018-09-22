@@ -24,14 +24,24 @@
             }
         //}
     }
+
+
     dot::Dot::Dot(){
-      //run with defualt port
-      //_sock = comm_start_server(3500);
-      fut = std::async (std::launch::async, comm_start_server, 3500);
-      _sock = fut.get();
-      readLooper = &ReadLooper::getReadLooper(_sock);
+      readLooper = &ReadLooper::getReadLooper();
       //readLooper->run();//TODO non-blocking
+      serverThread = new std::thread ([&](){
+        //run with defualt port
+          _sock = comm_start_server(3500);
+          if(_sock < 1){
+            fireEvent(DotEvent::DISCONNECTED, *this);
+            return;
+          }
+          fireEvent(DotEvent::CONNECTED, *this);
+          readLooper->_sock = _sock;
+          readLooper->run(*this);
+      });
     }
+
     dot::Dot::Dot(const Dot &dot){
 
     }
@@ -113,9 +123,10 @@
     int dot::Dot::run(){
         //runner = std::async(std::launch::async, &Dot::_run, this);
         //_readLoop();
-        readLooper->run(*this);
+        while(1); //wait till ever
         return 0;
     }
     dot::Dot::~Dot(){
         std::cout << "Dot ended" << std::endl;
+        serverThread->join();
     }

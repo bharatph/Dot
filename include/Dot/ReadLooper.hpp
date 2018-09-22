@@ -18,12 +18,12 @@ namespace dot {
    */
 class ReadLooper{
 private:
-  static comm_socket _sock;
   static ReadLooper *instance;
   bool shouldRun = false;
   std::vector<Reader *> registeredReaders;
     ReadLooper();
 public:
+  comm_socket _sock;
   static ReadLooper &getReadLooper(comm_socket);
   static ReadLooper &getReadLooper();
   void run(Dot &);

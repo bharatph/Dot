@@ -23,7 +23,6 @@ extern "C" {
 namespace dot {
 class Dot : public DotEventManager {
     private:
-    comm_socket _sock;
     static Dot *instance;
     ReadLooper *readLooper;
     std::future<comm_socket> fut;
@@ -31,12 +30,16 @@ class Dot : public DotEventManager {
     std::queue<DotOperation> incomingQueue;
     std::queue<DotOperation> outgoingQueue;
     std::future<void> runner;
+    std::thread *serverThread = nullptr;
     void _init();
     void _readLoop();
     Dot();
     Dot(const Dot &dot);
+
     protected:
+
     public:
+    comm_socket _sock;
     static Dot &getDot();
     Dot &connect(std::string host, int port);
     Dot &disconnect();

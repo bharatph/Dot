@@ -7,7 +7,7 @@ extern "C" {
 static const char *TAG = "ReadLooper";
 
 dot::ReadLooper *dot::ReadLooper::instance = nullptr;
-comm_socket dot::ReadLooper::_sock = -1;
+//comm_socket dot::ReadLooper::_sock = -1;
 
 dot::ReadLooper::ReadLooper(){
 
@@ -18,11 +18,6 @@ dot::ReadLooper &dot::ReadLooper::getReadLooper(){
     instance = new ReadLooper();
   }
   return *instance;
-}
-
-dot::ReadLooper &dot::ReadLooper::getReadLooper(comm_socket sock){
-_sock = sock;
-return getReadLooper();
 }
 
 //use libev insted to read
