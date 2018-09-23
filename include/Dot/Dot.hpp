@@ -1,5 +1,13 @@
 #ifndef _DOT
 #define _DOT "Dot"
+#if defined(_MSC_VER)
+#   if _MSC_VER < 1800 
+#       error This project needs atleast Visual Studio 2013
+#   endif
+#elif __cplusplus <= 199711L
+#   error This project can only be compiled with a compiler that supports C++11
+#endif
+
 
 #include <iostream>
 #include <thread>
@@ -20,8 +28,11 @@ extern "C" {
 }
 
 namespace dot {
-
-class Dot : public em::EventManager<DotEvent, Dot &> {
+	/*
+	 * All connected device is Dot
+	 * The current host is also a Dot
+	 */
+class Dot : public em::EventManager<dot::DotEvent, Dot &> {
     private:
     comm_socket current_sock;
     std::vector<Dot *> connectedDots;
@@ -32,6 +43,7 @@ class Dot : public em::EventManager<DotEvent, Dot &> {
     std::queue<DotOperation> outgoingQueue;
     std::future<void> runner;
     std::thread *serverThread = nullptr;
+	bool shouldServerRun = false;
     void _init();
     void _readLoop();
     Dot();
@@ -46,12 +58,12 @@ class Dot : public em::EventManager<DotEvent, Dot &> {
     Dot &connect(std::string host, int port);
     Dot &disconnect();
     void resume();
-    comm_socket getSocket();
-    ReadLooper &getReadLooper();
-    Writer &write(std::string message);
-    Reader &read();
-    Reader &readFor(int binaryFile, std::string fileType);
-    Reader &readFor(std::string message);
+	comm_socket getSocket();
+    dot::ReadLooper &getReadLooper();
+	dot::Writer &write(std::string message);
+    dot::Reader &read();
+    dot::Reader &readFor(int binaryFile, std::string fileType);
+    dot::Reader &readFor(std::string message);
     int run();
     ~Dot();
 };

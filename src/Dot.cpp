@@ -1,9 +1,14 @@
 #include <Dot/Dot.hpp>
 
+#include <Dot/DotEvent.hpp>
 #include <Dot/DotOperation.hpp>
 #include <Dot/ReadLooper.hpp>
 #include <Dot/Reader.hpp>
 #include <Dot/Writer.hpp>
+
+extern "C" {
+#include <comm.h>
+}
 
 #include <future>
 
@@ -18,14 +23,16 @@
 
     dot::Dot::Dot(){
       //readLooper->run();//TODO non-blocking
+		shouldServerRun = true;
       serverThread = new std::thread ([&](){
         //run with defualt port
-        while(1){
-          comm_socket sock = comm_start_server(3500);
+        while(shouldServerRun){
+			comm_socket sock = comm_start_server(3500);
           if(sock < 1){
             fireEvent(DotEvent::DISCONNECTED, *this);
             return;
           }
+		  std::cout << sock << std::endl;
           Dot *dot = new Dot(sock);
           connectedDots.push_back(dot);
           fireEvent(DotEvent::CONNECTED, *dot);
@@ -36,9 +43,14 @@
     dot::Dot::Dot(comm_socket sock){
       this->current_sock = sock;
       readLooper = new ReadLooper(this);
+	  readLooper->run();
     }
 
     dot::ReadLooper &dot::Dot::getReadLooper(){
+		if (readLooper == nullptr) {
+			log_err(_DOT, "Cannot use ReadLooper with local node");
+			throw readLooper;
+		}
       return *readLooper;
     }
 
@@ -49,7 +61,11 @@
 
     dot::Dot &dot::Dot::getDot(){
       if(instance == nullptr){
-        instance = new Dot();
+		  //if error occurs, log the error message and further operations on Dot will be no-op
+		  if (comm_init() < 0) {
+			  log_err(_DOT, "Cannot initialize Dot, make sure you have all the prerequisites installed");
+		  }
+		  instance = new Dot();
       }
       return *instance;
     }
@@ -74,7 +90,7 @@
         //dotState.val = "disconnected";
         if( comm_close_socket(current_sock) < 0){
           //print error
-          fireEvent(DotEvent::ERROR, *this);
+          //fireEvent(DotEvent::ERROR, *this);
           return *this;
       }
       fireEvent(DotEvent::DISCONNECTED, *this);
@@ -93,6 +109,13 @@
         outgoingQueue.push(writer.write(message));
         return writer;
     }
+
+	dot::Reader & dot::Dot::read()
+	{
+		// TODO: insert return statement here
+		Reader &reader = (*new Reader());
+		return reader;
+	}
 
     dot::Reader &dot::Dot::readFor(int binaryFile, std::string fileType){
         Reader &reader = *(new Reader(this));
@@ -124,6 +147,12 @@
         return 0;
     }
     dot::Dot::~Dot(){
-        std::cout << "Dot ended" << std::endl;
+		//stop accepting further connections
+		shouldServerRun = false;
+		//close any existing connections
+		for (Dot* dot : connectedDots) {
+			dot->disconnect();
+		}
+		//wait for the thread to end
         serverThread->join();
     }

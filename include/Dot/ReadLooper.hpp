@@ -3,12 +3,14 @@
 
 #include <vector>
 #include <Dot/Reader.hpp>
+#include <thread>
 
 extern "C" {
   #include <comm.h>
 }
 
 namespace dot {
+	class Dot;
   /*
    * Reads the socket indefinitely
    * Provides register interface, where Readers can register
@@ -16,9 +18,10 @@ namespace dot {
    */
 class ReadLooper{
 private:
-  Dot *dot;
+	Dot *dot = nullptr;
   bool shouldRun = false;
   std::vector<Reader *> registeredReaders;
+  std::thread *runnerThread = nullptr;
 protected:
   ReadLooper();
 public:
@@ -26,6 +29,7 @@ public:
   void run();
   void stop();
   void registerReader(Reader &);
+  ~ReadLooper();
 };
 }
 

@@ -3,8 +3,8 @@
 
 #include <Dot/DotOperation.hpp>
 
-namespace dot
-{
+namespace dot {
+	class Dot;
 //sends message, after callback is completed destroys itself
 class Writer : public DotOperation
 {

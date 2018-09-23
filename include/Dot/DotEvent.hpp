@@ -2,12 +2,12 @@
 #define _DOT_EVENT_H
 namespace dot {
   //Dot level event
-  enum class DotEvent {
-    ERROR,
-      CONNECTED,
-      RESUME,
-      PAUSE,
-      DISCONNECTED
-  };
+	enum class DotEvent
+	{
+		CONNECTED,
+		RESUME,
+		PAUSE,
+		DISCONNECTED
+	};
 }
 #endif

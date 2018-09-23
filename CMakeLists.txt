@@ -3,6 +3,7 @@ project(Dot VERSION 0.2 LANGUAGES CXX DESCRIPTION "Asynchronous Networking libra
 find_package(Threads)
 find_package(clog)
 find_package(comm)
+find_package(EventManager)
 file(GLOB_RECURSE Dot_HDRS "include/*.hpp")
 file(GLOB_RECURSE Dot_SRCS "src/*.cpp")
 
@@ -18,6 +19,9 @@ if(WIN32)
 endif()
 set_target_properties(Dot PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(Dot PUBLIC include)
+target_include_directories(Dot PUBLIC ${CLOG_INCLUDE_DIR})
+target_include_directories(Dot PUBLIC ${COMM_INCLUDE_DIR})
+target_include_directories(Dot PUBLIC ${EM_INCLUDE_DIR})
 
 install(FILES DotConfig.cmake DESTINATION lib/cmake/Dot)
 install(FILES ${Dot_HDRS} DESTINATION include/Dot)
