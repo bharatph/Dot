@@ -6,7 +6,7 @@ using namespace dot;
 int main(int argc, char *argv[])
 {
     Dot &server = Dot::getDot();
-    server.addEventHandler(DotEvent::CONNECTED, [](Dot &dot){
+    server.on(DotEvent::CONNECTED, [](Dot &dot){
 	  dot.readFor("hi").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot) {
 		  std::cout << "hi read" << '\n';
 	  });

@@ -324,6 +324,22 @@ int exit_handler(int sigevent){
     exit(sigevent);
 }
 
+/*
+ * DotProtocol categorizes whether the protocol is stateful or stateless
+ */
+class DotProtocol{
+public:
+  DotProtocol();
+};
+
+/*
+ * DotProtocolConfiguration supports DotProtocol for advance operations
+ * often extended and custom functions are defined
+ */
+class DotProtocolConfiguration(){
+public:
+  DotProtocolConfiguration();
+};
 
 //solo.cpp
 int main(int argc, char *argv[]) {
@@ -334,6 +350,19 @@ int main(int argc, char *argv[]) {
     });
     solo.addEventHandler(SoloState::EXIT, [](){
         exit_handler(0);
+    });
+    Dot &dot = Dot::getDot();
+    //other way of initializing Dot
+    //default protocol is html
+    Dot &dot = Dot::getDot().with(HTML);
+    dot.on(DotEvent::CONNECTED, [](Dot &dot){
+      //write using http
+      //using local dot
+      //TODO add support for stateless protocol such as html
+      //the write implementation for HTML constructs html with configuration class
+      dot.through(DotProtocol).with(DotProtocolConfiguration).write("hi");
+      //write as is
+      dot.write("hi");
     });
    return solo.run();
 }

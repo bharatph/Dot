@@ -32,7 +32,7 @@ namespace dot {
 	 * All connected device is Dot
 	 * The current host is also a Dot
 	 */
-class Dot : public em::EventManager<dot::DotEvent, Dot &> {
+class Dot : protected em::EventManager<dot::DotEvent, Dot &> {
     private:
     comm_socket current_sock;
     std::vector<Dot *> connectedDots;
@@ -53,6 +53,7 @@ class Dot : public em::EventManager<dot::DotEvent, Dot &> {
 
     public:
     Dot(comm_socket);
+    Dot &on(DotEvent, EventCallback);
     //returns the dot of the current system
     static Dot &getDot();
     Dot &connect(std::string host, int port);

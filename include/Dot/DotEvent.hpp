@@ -4,6 +4,8 @@ namespace dot {
   //Dot level event
 	enum class DotEvent
 	{
+		INITIALIZED,
+		TIMEOUT,
 		CONNECTED,
 		RESUME,
 		PAUSE,

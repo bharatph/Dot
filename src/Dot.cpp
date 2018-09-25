@@ -74,25 +74,35 @@ extern "C" {
         //DotOperation dotOperation;
         //dotState.val = "connected";
         //int connection = comm_connnect(sockfd);
+        std::thread *connectionThread = new std::thread([&](){
         comm_socket sock = comm_connect_server(host.c_str(), port);
         if(sock < 1){
           log_err(_DOT, "Connection failed");
           fireEvent(DotEvent::DISCONNECTED, *this);
+          return;
         }
         Dot *dot = new Dot(sock);
         connectedDots.push_back(dot);
         fireEvent(DotEvent::CONNECTED, *dot);
+      });
+      //connectionThread->detach();
         return (*this);
     }
+
+    dot::Dot &dot::Dot::on(DotEvent dotEvent, EventCallback eventCallback){
+      addEventHandler(dotEvent, eventCallback);
+      return (*this);
+    }
+
     dot::Dot &dot::Dot::disconnect(){
         //TODO if connected disconnect, else don't bother
         //DotOperation dotOperation;
         //dotState.val = "disconnected";
         if( comm_close_socket(current_sock) < 0){
           //print error
-          //fireEvent(DotEvent::ERROR, *this);
+          fireEvent(DotEvent::DISCONNECTED, *this);
           return *this;
-      }
+        }
       fireEvent(DotEvent::DISCONNECTED, *this);
       return *this;
     }
