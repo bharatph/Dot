@@ -3,7 +3,7 @@
 #include <Dot/Dot.hpp>
 
 extern "C" {
-  #include <clog.h>
+  #include <clog/clog.h>
   #include <comm.h>
 }
 

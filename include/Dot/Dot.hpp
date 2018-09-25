@@ -1,7 +1,7 @@
 #ifndef _DOT
 #define _DOT "Dot"
 #if defined(_MSC_VER)
-#   if _MSC_VER < 1800 
+#   if _MSC_VER < 1800
 #       error This project needs atleast Visual Studio 2013
 #   endif
 #elif __cplusplus <= 199711L
@@ -24,7 +24,7 @@
 
 extern "C" {
 #include <comm.h>
-#include <clog.h>
+#include <clog/clog.h>
 }
 
 namespace dot {
