@@ -26,7 +26,7 @@ void dot::ReadLooper::run(){
 			//read the main socket in regular intervals
 			char *buffer = (char *)calloc(sizeof(char), 1024);
 			int stat = recv(dot->getSocket(), buffer, 20, 0);
-			if (stat < 0) {
+			if (stat == SOCKET_ERROR) {
 				log_err(TAG, "Error reading");
 				shouldRun = false;
 			}

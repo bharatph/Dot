@@ -14,6 +14,8 @@ int main(int argc, char *argv[])
 		  std::cout << "hello read" << '\n';
 		  dot.write("hello back");
 	  });
+    }).on(DotEvent::DISCONNECTED, [](Dot &dot){
+      std::cout << "client disconnected" << std::endl;
     });
     return server.run();
 }
