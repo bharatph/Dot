@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     dot.on(DotEvent::DISCONNECTED, [](Dot &dot){
       std::cout << "disconnected" << '\n';
     });
-    dot.disconnect();
+    //dot.disconnect();
     })
     .on(DotEvent::TIMEOUT, [](Dot &dot){
     })

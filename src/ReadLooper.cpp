@@ -41,6 +41,7 @@ void dot::ReadLooper::run(){
 			if (line_no < 1)continue;
 			//compare read line with registered readers
 			for (Reader *reader : registeredReaders) {
+        if(reader->getMessage() == "*")
 				if (strstr(lines[0], reader->getMessage().c_str()) != NULL) {
 					reader->notify(buffer);//FIXEME send timestamp instead of string
 				}

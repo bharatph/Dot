@@ -28,3 +28,11 @@ dot::Writer &dot::Writer::write(std::string message)
       }
     return *this;
 }
+
+dot::Writer &dot::Writer::write(std::string message){
+    //add to queue and let runner decide whether to run or not
+    //DotState dotState;
+    //writeFunc(dotState);
+    Writer &writer = *(new Writer(this));
+    return writer;
+}

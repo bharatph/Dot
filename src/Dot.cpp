@@ -22,6 +22,8 @@ extern "C" {
     }
 
     dot::Dot::Dot(){
+      reader = new Reader(this);
+      writer = new Writer(this);
       //readLooper->run();//TODO non-blocking
 		shouldServerRun = true;
       serverThread = new std::thread ([&](){
@@ -63,7 +65,7 @@ extern "C" {
       if(instance == nullptr){
 		  //if error occurs, log the error message and further operations on Dot will be no-op
 		  if (comm_init() < 0) {
-			  log_err(_DOT, "Cannot initialize Dot, make sure you have all the prerequisites installed");
+			  log_fat(_DOT, "Cannot initialize Dot, make sure you have all the prerequisites installed");
 		  }
 		  instance = new Dot();
       }
@@ -108,44 +110,14 @@ extern "C" {
         //dotState.val = "resume";
         fireEvent(DotEvent::RESUME, *this);
     }
-    dot::Writer &dot::Dot::write(std::string message){
-        //add to queue and let runner decide whether to run or not
-        //DotState dotState;
-        //writeFunc(dotState);
-        Writer &writer = *(new Writer(this));
-        outgoingQueue.push(writer.write(message));
-        return writer;
+
+    dot::Reader &dot::Dot::getReader(){
+      return *reader;
     }
 
-	dot::Reader & dot::Dot::read()
-	{
-		// TODO: insert return statement here
-		Reader &reader = (*new Reader());
-		return reader;
-	}
-
-    dot::Reader &dot::Dot::readFor(int binaryFile, std::string fileType){
-        Reader &reader = *(new Reader(this));
-        //readForMap[fileType] = readForCallback;
-        return reader.read(fileType);
+    dot::Writer &dot::Dot::getWriter(){
+      return *writer;
     }
-
-    dot::Reader &dot::Dot::readFor(std::string message){
-        Reader &reader = *(new Reader(this));
-        //readForMap[message] = readForCallback;
-        return reader.read(message);
-    }
-
-    /*
-    Reader &readFor(std::vector<std::string> messages){
-        Reader *reader = new Reader();
-        for(std::string message : messages){
-            reads[message] = readFunc;
-            reader.read(messages)
-        }
-        return *reader;
-    }
-    */
 
     int dot::Dot::run(){
         //runner = std::async(std::launch::async, &Dot::_run, this);

@@ -37,8 +37,9 @@ class Dot : protected em::EventManager<dot::DotEvent, Dot &> {
     comm_socket current_sock;
     std::vector<Dot *> connectedDots;
     static Dot *instance;
+    Reader *reader;
+    Writer *writer;
     ReadLooper *readLooper;
-    std::map<std::string, EventCallback> readForMap;
     std::queue<DotOperation> incomingQueue;
     std::queue<DotOperation> outgoingQueue;
     std::future<void> runner;
@@ -61,10 +62,8 @@ class Dot : protected em::EventManager<dot::DotEvent, Dot &> {
     void resume();
 	comm_socket getSocket();
     dot::ReadLooper &getReadLooper();
-	dot::Writer &write(std::string message);
-    dot::Reader &read();
-    dot::Reader &readFor(int binaryFile, std::string fileType);
-    dot::Reader &readFor(std::string message);
+    Reader &getReader();
+    Writer &getWriter();
     int run();
     ~Dot();
 };
