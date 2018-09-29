@@ -23,7 +23,7 @@ dot::Reader &dot::Reader::read(std::string message)
 }
 
 void dot::Reader::notify(std::string message){
-      fireEvent(DotOperationEvent::SUCCESS, *dot);
+      fireEvent(DotOperationEvent::SUCCESS, *dot, message);
 }
 
 std::string dot::Reader::getMessage(){

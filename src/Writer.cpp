@@ -22,9 +22,9 @@ dot::Writer &dot::Writer::write(std::string message)
       size_t wrote = ::send(dot->getSocket(), temp, message.length(), 0); //TODO use libcomm to support atomic functions
       if(wrote < 1){
         log_err(TAG, "Opeation failed");
-        fireEvent(DotOperationEvent::FAILED, *dot);
+        fireEvent(DotOperationEvent::FAILED, *dot, message);
       } else {
-        fireEvent(DotOperationEvent::SUCCESS, *dot);
+        fireEvent(DotOperationEvent::SUCCESS, *dot, message);
       }
     return *this;
 }

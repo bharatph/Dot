@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     Dot &dot = Dot::getDot();
     dot.connect("localhost", 3500)
     .on(DotEvent::CONNECTED, [](Dot &dot){
-      dot.readFor("hello back").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot) {
+      dot.readFor("hello back").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
         dot.write("hi");
       });
     dot.write("hello");
