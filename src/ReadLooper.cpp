@@ -40,15 +40,13 @@ void dot::ReadLooper::run(){
 			char **lines = read_line(&line_no, buffer);
 			if (lines == NULL)continue;
 			if (line_no < 1)continue;
-				std::cout << lines[0] << std::endl;
 			//compare read line with registered readers
 			for (Reader *reader : registeredReaders) {
 				std::string readMessage(lines[0]);
 				std::regex reg(reader->getMessage());
-				std::cout << reader->getMessage() << std::endl;
 				if (std::regex_match(readMessage, reg)) {
 					std::cout << "match " << std::endl;
-					reader->notify(buffer);//FIXEME send timestamp instead of string
+					reader->notify(buffer);//FIXEME send timestamp and string
 				}
 			}
 		}
