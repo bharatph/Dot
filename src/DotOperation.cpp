@@ -11,3 +11,8 @@ void dot::DotOperation::notify(std::string){
 dot::DotOperation::~DotOperation(){
   std::cout << "Ending" << std::endl;
 }
+
+dot::DotOperation &dot::DotOperation::on(dot::DotOperationEvent dotOperationEvent, EventCallback eventCallback){
+  addEventHandler(dotOperationEvent, eventCallback);
+  return *this;
+}

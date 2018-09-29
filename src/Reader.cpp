@@ -6,6 +6,10 @@ dot::Reader::Reader()
 {
 }
 
+dot::Reader::Reader(const Reader &reader){
+  this->dot = reader.dot;
+}
+
 dot::Reader::Reader(Dot *dot)
 {
     this->dot = dot;

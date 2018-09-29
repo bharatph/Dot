@@ -1,6 +1,7 @@
 #ifndef _READER_H
 #define _READER_H
 #include <iostream>
+#include <vector>
 #include <Dot/DotOperation.hpp>
 
 namespace dot
@@ -18,6 +19,7 @@ class Reader : public DotOperation
   public:
     Reader();
     Reader(Dot *dot);
+    Reader(const Reader &);
     Reader &read(std::string message);
     std::string getMessage();
     void notify(std::string) override; //TODO add timestamp with message
