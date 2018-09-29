@@ -28,10 +28,13 @@ extern "C" {
 }
 
 namespace dot {
-	/*
-	 * All connected device is Dot
-	 * The current host is also a Dot
-	 */
+  	/*
+  	 * All connected device is a Dot
+  	 * The current host is also a Dot
+     * Every dot has read and write operation
+     * Read is either blocking or non-blocking
+     * Write is non-blocking
+  	 */
 class Dot : protected em::EventManager<dot::DotEvent, Dot &> {
     private:
     comm_socket current_sock;
@@ -59,12 +62,16 @@ class Dot : protected em::EventManager<dot::DotEvent, Dot &> {
     Dot &connect(std::string host, int port);
     Dot &disconnect();
     void resume();
-	comm_socket getSocket();
-    dot::ReadLooper &getReadLooper();
-	dot::Writer &write(std::string message);
-    dot::Reader &read();
-    dot::Reader &readFor(int binaryFile, std::string fileType);
-    dot::Reader &readFor(std::string message);
+	  comm_socket getSocket();
+    ReadLooper &getReadLooper();
+	  Writer &write(std::string message);
+    Reader &read();
+    Reader &readFor(int binaryFile, std::string fileType);
+    /*
+     * Regex supported readFor
+     */
+    Reader &readFor(std::string message);
+    Reader &readFor(std::vector<std::string> messages);
     int run();
     ~Dot();
 };

@@ -100,6 +100,7 @@ extern "C" {
           fireEvent(DotEvent::DISCONNECTED, *this);
           return *this;
         }
+      shouldServerRun = false;
       fireEvent(DotEvent::DISCONNECTED, *this);
       return *this;
     }
@@ -136,21 +137,24 @@ extern "C" {
         return reader.read(message);
     }
 
-    /*
-    Reader &readFor(std::vector<std::string> messages){
-        Reader *reader = new Reader();
-        for(std::string message : messages){
-            reads[message] = readFunc;
-            reader.read(messages)
-        }
+
+    dot::Reader &dot::Dot::readFor(std::vector<std::string> messages){
+      if(messages.size() == 0){
+        //throw exception perhaps?
+        return *(new Reader(this));
+      }
+
+        Reader *reader = new Reader(this);
+          for(std::string message : messages){
+            reader->read(message);
+          }
         return *reader;
     }
-    */
 
     int dot::Dot::run(){
         //runner = std::async(std::launch::async, &Dot::_run, this);
         //_readLoop();
-        while(1); //wait till ever
+        while(shouldServerRun); //wait till ever
         return 0;
     }
     dot::Dot::~Dot(){

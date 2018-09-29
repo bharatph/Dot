@@ -1,6 +1,7 @@
 #include <Dot/ReadLooper.hpp>
 #include <Dot/Reader.hpp>
 #include <Dot/Dot.hpp>
+#include <regex>
 
 extern "C" {
   #include <clog/clog.h>
@@ -41,8 +42,10 @@ void dot::ReadLooper::run(){
 			if (line_no < 1)continue;
 			//compare read line with registered readers
 			for (Reader *reader : registeredReaders) {
-				if (strstr(lines[0], reader->getMessage().c_str()) != NULL) {
-					reader->notify(buffer);//FIXEME send timestamp instead of string
+				std::string readMessage(lines[0]);
+				std::regex reg(reader->getMessage());
+				if (std::regex_match(readMessage, reg)) {
+					reader->notify(buffer);//FIXEME send timestamp and string
 				}
 			}
 		}

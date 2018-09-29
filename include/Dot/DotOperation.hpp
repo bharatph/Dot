@@ -11,6 +11,8 @@ class DotOperation : public em::EventManager<DotOperationEvent, Dot &> {
     DotOperation();
     ~DotOperation();
     virtual void notify(std::string);
+    DotOperation &on(DotOperationEvent, EventCallback);
+    EventCallback getEventHandler();
 };
 }
 
