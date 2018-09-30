@@ -4,7 +4,7 @@
 using namespace dot;
 int main(int argc, char *argv[])
 {
-    Dot &dot = Dot::getDot();
+    Dot &dot = Dot::getDot(0);
     dot.connect("localhost", 3500)
     .on(DotEvent::CONNECTED, [](Dot &dot){
       dot.readFor("hello back").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
