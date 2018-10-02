@@ -9,6 +9,8 @@ extern "C"
 #include <comm.h>
 }
 
+#include <Dot/ReadLooperEvent.hpp>
+
 static const char *TAG = "ReadLooper";
 
 dot::ReadLooper::ReadLooper()
@@ -31,6 +33,7 @@ void dot::ReadLooper::run()
 			{
 				log_err(TAG, "Client disconnected");
 				shouldRun = false;
+				fireEvent(ReadLooperEvent::DISCONNECTED);
 				continue;
 			}
 			//compare read line with registered readers

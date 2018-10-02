@@ -37,6 +37,9 @@ Dot &read_all_server()
     dot.readFor(".*").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
       std::cout << message << std::endl;
     });
+    dot.on(DotEvent::DISCONNECTED, [](Dot &dot){
+      std::cout << "Client disconnected" << std::endl;
+    });
   });
   return server;
 }
