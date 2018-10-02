@@ -29,10 +29,10 @@ void dot::ReadLooper::run()
 			const char *buffer = comm_read_text(dot->getSocket(), 1024);
 			if (buffer == NULL)
 			{
-				log_err(TAG, "Error reading");
+				log_err(TAG, "Client disconnected");
 				shouldRun = false;
+				continue;
 			}
-
 			//compare read line with registered readers
 			for (Reader *reader : registeredReaders)
 			{
