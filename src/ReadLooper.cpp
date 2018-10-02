@@ -3,62 +3,58 @@
 #include <Dot/Dot.hpp>
 #include <regex>
 
-extern "C" {
-  #include <clog/clog.h>
-  #include <comm.h>
+extern "C"
+{
+#include <clog/clog.h>
+#include <comm.h>
 }
 
 static const char *TAG = "ReadLooper";
 
-
-dot::ReadLooper::ReadLooper(){
-
+dot::ReadLooper::ReadLooper()
+{
 }
-dot::ReadLooper::ReadLooper(Dot *dot) : dot(dot){
-
+dot::ReadLooper::ReadLooper(Dot *dot) : dot(dot)
+{
 }
-
 
 //use libev insted to read
-void dot::ReadLooper::run(){
+void dot::ReadLooper::run()
+{
 	runnerThread = new std::thread([&]() {
 		shouldRun = true;
-		while (shouldRun) {
+		while (shouldRun)
+		{
 			//read the main socket in regular intervals
-			char *buffer = (char *)calloc(sizeof(char), 1024);
-			int stat = recv(dot->getSocket(), buffer, 20, 0);
-			if (stat == SOCKET_ERROR) {
-				log_err(TAG, "Error reading");
+			const char *buffer = comm_read_text(dot->getSocket(), 1024);
+			if (buffer == NULL)
+			{
+				log_err(TAG, "Client disconnected");
 				shouldRun = false;
+				continue;
 			}
-			else if (stat == 0) {
-				shouldRun = false;
-			}
-			//read line
-			int line_no = 0;
-			if (buffer == NULL)continue;
-			char **lines = read_line(&line_no, buffer);
-			if (lines == NULL)continue;
-			if (line_no < 1)continue;
 			//compare read line with registered readers
-			for (Reader *reader : registeredReaders) {
-				std::string readMessage(lines[0]);
+			for (Reader *reader : registeredReaders)
+			{
+				std::string readMessage(buffer);
 				std::regex reg(reader->getMessage());
-				if (std::regex_match(readMessage, reg)) {
-					reader->notify(buffer);//FIXEME send timestamp and string
+				if (std::regex_match(readMessage, reg))
+				{
+					reader->notify(buffer); //FIXEME send timestamp and string
 				}
 			}
 		}
 	});
 }
 
-void dot::ReadLooper::stop(){
-  shouldRun = false;
-
+void dot::ReadLooper::stop()
+{
+	shouldRun = false;
 }
 
-void dot::ReadLooper::registerReader(Reader &reader){
-  registeredReaders.push_back(&reader);
+void dot::ReadLooper::registerReader(Reader &reader)
+{
+	registeredReaders.push_back(&reader);
 }
 
 dot::ReadLooper::~ReadLooper()
