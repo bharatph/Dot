@@ -1,6 +1,7 @@
 #include <iostream>
 #include <Dot/Dot.hpp>
 #include <Dot/DotOperationEvent.hpp>
+#include <string>
 
 using namespace dot;
 
