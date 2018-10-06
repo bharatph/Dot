@@ -44,6 +44,8 @@ void dot::ReadLooper::run()
 				{
 					reader->notify(buffer); //FIXEME send timestamp and string
 				}
+				else
+					reader->notify("");
 			}
 		}
 	});
