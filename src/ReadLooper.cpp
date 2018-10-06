@@ -39,9 +39,8 @@ void dot::ReadLooper::run()
 			//compare read line with registered readers
 			for (Reader *reader : registeredReaders)
 			{
-				std::string readMessage(buffer);
 				std::regex reg(reader->getMessage());
-				if (std::regex_match(readMessage, reg))
+				if (std::regex_match(buffer, reg))
 				{
 					reader->notify(buffer); //FIXEME send timestamp and string
 				}

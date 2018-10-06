@@ -92,6 +92,11 @@ dot::Dot &dot::Dot::getDot(int port)
   return *(*instances)[port];
 }
 
+static int i = -1;
+dot::Dot &dot::Dot::getDot(){
+  return getDot(i--);
+}
+
 dot::Dot &dot::Dot::connect(std::string host, int port)
 {
   std::thread *connectionThread = new std::thread([&](int port_param) {

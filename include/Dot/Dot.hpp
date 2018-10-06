@@ -38,42 +38,43 @@ namespace dot
   	 */
 class Dot : protected em::EventManager<dot::DotEvent, Dot &>
 {
-  private:
-    comm_socket current_sock;
-    std::vector<Dot *> connectedDots;
-    static std::map<int, Dot *> *instances;
-    ReadLooper *readLooper;
-    std::map<std::string, EventCallback> readForMap;
-    std::queue<DotOperation> incomingQueue;
-    std::queue<DotOperation> outgoingQueue;
-    std::future<void> runner;
-    std::thread *serverThread = nullptr;
-    bool shouldServerRun = false;
-    Dot &listen(int port);
-    Dot();
-    Dot(const Dot &dot);
+private:
+  comm_socket current_sock;
+  std::vector<Dot *> connectedDots;
+  static std::map<int, Dot *> *instances;
+  ReadLooper *readLooper;
+  std::map<std::string, EventCallback> readForMap;
+  std::queue<DotOperation> incomingQueue;
+  std::queue<DotOperation> outgoingQueue;
+  std::future<void> runner;
+  std::thread *serverThread = nullptr;
+  bool shouldServerRun = false;
+  Dot &listen(int port);
+  Dot();
+  Dot(const Dot &dot);
 
-  protected:
-  public:
-    Dot(comm_socket);
-    Dot &on(DotEvent, EventCallback);
-    //returns the dot of the current system
-    static Dot &getDot(int port);
-    Dot &connect(std::string host, int port);
-    Dot &disconnect();
-    void resume();
-    comm_socket getSocket();
-    ReadLooper &getReadLooper();
-    Writer &write(std::string message);
-    Reader &read();
-    Reader &readFor(int binaryFile, std::string fileType);
-    /*
+protected:
+public:
+  Dot(comm_socket);
+  Dot &on(DotEvent, EventCallback);
+  //returns the dot of the current system
+  static Dot &getDot(int port);
+  static Dot &getDot();
+  Dot &connect(std::string host, int port);
+  Dot &disconnect();
+  void resume();
+  comm_socket getSocket();
+  ReadLooper &getReadLooper();
+  Writer &write(std::string message);
+  Reader &read();
+  Reader &readFor(int binaryFile, std::string fileType);
+  /*
      * Regex supported readFor
      */
-    Reader &readFor(std::string message);
-    Reader &readFor(std::vector<std::string> messages);
-    int run();
-    ~Dot();
+  Reader &readFor(std::string message);
+  Reader &readFor(std::vector<std::string> messages);
+  int run();
+  ~Dot();
 };
 } // namespace dot
 #endif
