@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(Dot VERSION 0.2 LANGUAGES CXX DESCRIPTION "Asynchronous Networking library for C++")
+project(Dot VERSION 0.3.3 LANGUAGES CXX DESCRIPTION "Asynchronous Networking library for C++")
 find_package(Threads)
 find_package(clog)
 find_package(comm)
