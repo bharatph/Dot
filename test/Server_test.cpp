@@ -35,8 +35,10 @@ Dot &read_all_server()
 
   Dot &server = Dot::getDot(3500);
   server.on(DotEvent::CONNECTED, [](Dot &dot) {
-    dot.readFor(".*").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
+    dot.readFor("([a-z])*").on(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
       std::cout << message << std::endl;
+    }).on(DotOperationEvent::FAILED, [](Dot &dot, std::string message){
+      std::cout << "error message" << std::endl;
     });
     dot.on(DotEvent::DISCONNECTED, [](Dot &dot){
       std::cout << "Client disconnected" << std::endl;

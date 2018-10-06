@@ -162,14 +162,12 @@ dot::Reader &dot::Dot::read()
 dot::Reader &dot::Dot::readFor(int binaryFile, std::string fileType)
 {
   Reader &reader = *(new Reader(this));
-  //readForMap[fileType] = readForCallback;
   return reader.read(fileType);
 }
 
 dot::Reader &dot::Dot::readFor(std::string message)
 {
   Reader &reader = *(new Reader(this));
-  //readForMap[message] = readForCallback;
   return reader.read(message);
 }
 
