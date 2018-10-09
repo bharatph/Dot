@@ -14,7 +14,6 @@ Dot &setup_and_start_server()
           });
           dot.readFor("hello").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
             std::cout << "hello read" << '\n';
-            dot.write("hello back");
           });
           std::vector<std::string> msgs;
           msgs.push_back("good");
@@ -36,20 +35,38 @@ Dot &read_all_server()
   Dot &server = Dot::getDot(3500);
   server.on(DotEvent::CONNECTED, [](Dot &dot) {
     dot.readFor("([a-z])*").on(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
-      std::cout << message << std::endl;
-    }).on(DotOperationEvent::FAILED, [](Dot &dot, std::string message){
-      std::cout << "error message" << std::endl;
-    });
-    dot.on(DotEvent::DISCONNECTED, [](Dot &dot){
+                             std::cout << message << std::endl;
+                           })
+        .on(DotOperationEvent::FAILED, [](Dot &dot, std::string message) {
+          std::cout << "error message" << std::endl;
+        });
+    dot.on(DotEvent::DISCONNECTED, [](Dot &dot) {
       std::cout << "Client disconnected" << std::endl;
     });
   });
   return server;
 }
 
+Dot &send_binary()
+{
+  Dot &server = Dot::getDot(3500);
+  server
+      .on(DotEvent::CONNECTED, [](Dot &dot) {
+        dot.readFor("hello")
+            .on(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
+              std::cout << "hello read" << std::endl;
+              dot.getLooper().sendFile("./Dot_server_test");
+            });
+      })
+      .on(DotEvent::DISCONNECTED, [](Dot &) {
+        std::cout << "disconnected" << std::endl;
+      });
+  return server;
+}
+
 int main(int argc, char *argv[])
 {
-  Dot &server = read_all_server();
+  Dot &server = send_binary();
   char c = 'a';
   std::cin >> c;
   if (c == 'q')

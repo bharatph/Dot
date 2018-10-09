@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <thread>
+#include <fstream>
 
 extern "C"
 {
@@ -27,6 +28,7 @@ class DotLooper : public em::EventManager<DotEvent>
 private:
   Dot *dot = nullptr;
   bool shouldRun = false;
+  bool readText = false;
   std::vector<Reader *> registeredReaders;
   std::thread *runnerThread = nullptr;
 
@@ -37,6 +39,8 @@ public:
   DotLooper(Dot *dot);
   void run();
   void stop();
+  int sendFile(std::string);
+  std::ofstream &readFile(int toRead);
   void registerReader(Reader &);
   ~DotLooper();
 };
