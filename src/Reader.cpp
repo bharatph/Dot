@@ -18,8 +18,7 @@ dot::Reader::Reader(Dot *dot)
 
 dot::Reader &dot::Reader::read(std::string message)
 {
-  this->_message = message;
-  dot->getLooper().registerReader(*this);
+  dot->getLooper().registerReader(*this, message);
   return *this;
 }
 
@@ -31,9 +30,4 @@ void dot::Reader::notify(std::string message)
     return;
   }
   fireEvent(DotOperationEvent::SUCCESS, *dot, message);
-}
-
-std::string dot::Reader::getMessage()
-{
-  return _message;
 }

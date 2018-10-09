@@ -14,14 +14,12 @@ class Reader : public DotOperation
 {
   private:
     Dot *dot;
-    std::string _message;
 
   public:
     Reader();
     Reader(Dot *dot);
     Reader(const Reader &);
     Reader &read(std::string message);
-    std::string getMessage();
     void notify(std::string) override; //TODO add timestamp with message
 };
 }

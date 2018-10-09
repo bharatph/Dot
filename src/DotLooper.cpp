@@ -28,11 +28,10 @@ void dot::DotLooper::run()
 		shouldRun = true;
 		while (shouldRun)
 		{
-			if (registeredReaders.size() == 0)
+			if (textReaders.size() == 0)
 			{
 				continue;
 			}
-			std::cout << "reading" << std::endl;
 			//read the main socket in regular intervals
 			char *buffer = comm_read_text(dot->getSocket(), 1024);
 			if (buffer == NULL)
@@ -43,15 +42,15 @@ void dot::DotLooper::run()
 				continue;
 			}
 			//compare read line with registered readers
-			for (Reader *reader : registeredReaders)
+			for (std::pair<Reader *, std::string> textReaderPair : textReaders)
 			{
-				std::regex reg(reader->getMessage());
+				std::regex reg(textReaderPair.second);
 				if (std::regex_match(buffer, reg))
 				{
-					reader->notify(buffer); //FIXEME send timestamp and string
+					textReaderPair.first->notify(buffer); //FIXEME send timestamp and string
 				}
 				else
-					reader->notify("");
+					textReaderPair.first->notify("");
 			}
 		}
 	});
@@ -94,9 +93,9 @@ std::ofstream &dot::DotLooper::readFile(int toRead)
 	return file;
 }
 
-void dot::DotLooper::registerReader(Reader &reader)
+void dot::DotLooper::registerReader(Reader &reader, std::string message)
 {
-	registeredReaders.push_back(&reader);
+	textReaders[&reader] = message;
 }
 
 dot::DotLooper::~DotLooper()

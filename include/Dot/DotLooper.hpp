@@ -29,7 +29,7 @@ private:
   Dot *dot = nullptr;
   bool shouldRun = false;
   bool readText = false;
-  std::vector<Reader *> registeredReaders;
+  std::map<Reader *, std::string> textReaders;
   std::thread *runnerThread = nullptr;
 
 protected:
@@ -41,7 +41,7 @@ public:
   void stop();
   int sendFile(std::string);
   std::ofstream &readFile(int toRead);
-  void registerReader(Reader &);
+  void registerReader(Reader &, std::string);
   ~DotLooper();
 };
 } // namespace dot

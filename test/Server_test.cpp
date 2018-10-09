@@ -66,7 +66,7 @@ Dot &send_binary()
 
 int main(int argc, char *argv[])
 {
-  Dot &server = send_binary();
+  Dot &server = read_all_server();
   char c = 'a';
   std::cin >> c;
   if (c == 'q')
