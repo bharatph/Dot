@@ -1,4 +1,4 @@
-#include <Dot/ReadLooper.hpp>
+#include <Dot/DotLooper.hpp>
 #include <Dot/Reader.hpp>
 #include <Dot/Dot.hpp>
 #include <regex>
@@ -9,19 +9,19 @@ extern "C"
 #include <comm.h>
 }
 
-#include <Dot/ReadLooperEvent.hpp>
+#include <Dot/DotLooperEvent.hpp>
 
-static const char *TAG = "ReadLooper";
+static const char *TAG = "DotLooper";
 
-dot::ReadLooper::ReadLooper()
+dot::DotLooper::DotLooper()
 {
 }
-dot::ReadLooper::ReadLooper(Dot *dot) : dot(dot)
+dot::DotLooper::DotLooper(Dot *dot) : dot(dot)
 {
 }
 
 //use libev insted to read
-void dot::ReadLooper::run()
+void dot::DotLooper::run()
 {
 	runnerThread = new std::thread([&]() {
 		shouldRun = true;
@@ -33,7 +33,7 @@ void dot::ReadLooper::run()
 			{
 				log_err(TAG, "Client disconnected");
 				shouldRun = false;
-				fireEvent(ReadLooperEvent::DISCONNECTED);
+				fireEvent(DotLooperEvent::DISCONNECTED);
 				continue;
 			}
 			//compare read line with registered readers
@@ -51,17 +51,17 @@ void dot::ReadLooper::run()
 	});
 }
 
-void dot::ReadLooper::stop()
+void dot::DotLooper::stop()
 {
 	shouldRun = false;
 }
 
-void dot::ReadLooper::registerReader(Reader &reader)
+void dot::DotLooper::registerReader(Reader &reader)
 {
 	registeredReaders.push_back(&reader);
 }
 
-dot::ReadLooper::~ReadLooper()
+dot::DotLooper::~DotLooper()
 {
 	runnerThread->join();
 }

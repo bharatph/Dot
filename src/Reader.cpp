@@ -1,5 +1,5 @@
 #include <Dot/Reader.hpp>
-#include <Dot/ReadLooper.hpp>
+#include <Dot/DotLooper.hpp>
 #include <Dot/Dot.hpp>
 
 dot::Reader::Reader()
@@ -19,7 +19,7 @@ dot::Reader::Reader(Dot *dot)
 dot::Reader &dot::Reader::read(std::string message)
 {
   this->_message = message;
-  dot->getReadLooper().registerReader(*this);
+  dot->getLooper().registerReader(*this);
   return *this;
 }
 

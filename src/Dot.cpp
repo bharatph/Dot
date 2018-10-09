@@ -5,8 +5,8 @@
 
 #include <Dot/DotEvent.hpp>
 #include <Dot/DotOperation.hpp>
-#include <Dot/ReadLooperEvent.hpp>
-#include <Dot/ReadLooper.hpp>
+#include <Dot/DotLooperEvent.hpp>
+#include <Dot/DotLooper.hpp>
 #include <Dot/Reader.hpp>
 #include <Dot/Writer.hpp>
 
@@ -31,8 +31,8 @@ dot::Dot::Dot()
 dot::Dot::Dot(comm_socket sock)
 {
   this->current_sock = sock;
-  readLooper = new ReadLooper(this);
-  readLooper->addEventHandler(ReadLooperEvent::DISCONNECTED, [&](){
+  readLooper = new DotLooper(this);
+  readLooper->addEventHandler(DotLooperEvent::DISCONNECTED, [&](){
     fireEvent(DotEvent::DISCONNECTED, *this);
   });
   readLooper->run();
@@ -61,11 +61,11 @@ dot::Dot &dot::Dot::listen(int port)
   return *this;
 }
 
-dot::ReadLooper &dot::Dot::getReadLooper()
+dot::DotLooper &dot::Dot::getLooper()
 {
   if (readLooper == nullptr)
   {
-    log_err(_DOT, "Cannot use ReadLooper with local node");
+    log_err(_DOT, "Cannot use DotLooper with local node");
     throw readLooper;
   }
   return *readLooper;

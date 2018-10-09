@@ -19,7 +19,7 @@
 #include <Dot/DotEvent.hpp>
 #include <Dot/Reader.hpp>
 #include <Dot/Writer.hpp>
-#include <Dot/ReadLooper.hpp>
+#include <Dot/DotLooper.hpp>
 
 extern "C"
 {
@@ -42,7 +42,7 @@ private:
   comm_socket current_sock;
   std::vector<Dot *> connectedDots;
   static std::map<int, Dot *> *instances;
-  ReadLooper *readLooper;
+  DotLooper *readLooper;
   std::map<std::string, EventCallback> readForMap;
   std::queue<DotOperation> incomingQueue;
   std::queue<DotOperation> outgoingQueue;
@@ -64,7 +64,7 @@ public:
   Dot &disconnect();
   void resume();
   comm_socket getSocket();
-  ReadLooper &getReadLooper();
+  DotLooper &getLooper();
   Writer &write(std::string message);
   Reader &read();
   Reader &readFor(int binaryFile, std::string fileType);

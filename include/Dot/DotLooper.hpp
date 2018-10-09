@@ -10,7 +10,7 @@ extern "C"
 }
 
 #include <Dot/Reader.hpp>
-#include <Dot/ReadLooperEvent.hpp>
+#include <Dot/DotLooperEvent.hpp>
 
 #include <em/EventManager.hpp>
 
@@ -22,7 +22,7 @@ class Dot;
    * Provides register interface, where Readers can register
    * The register (Reader)s will be called when a new message arrives
    */
-class ReadLooper : public em::EventManager<ReadLooperEvent>
+class DotLooper : public em::EventManager<DotLooperEvent>
 {
 private:
   Dot *dot = nullptr;
@@ -31,14 +31,14 @@ private:
   std::thread *runnerThread = nullptr;
 
 protected:
-  ReadLooper();
+  DotLooper();
 
 public:
-  ReadLooper(Dot *dot);
+  DotLooper(Dot *dot);
   void run();
   void stop();
   void registerReader(Reader &);
-  ~ReadLooper();
+  ~DotLooper();
 };
 } // namespace dot
 

@@ -8,7 +8,7 @@ namespace dot
 {
   class Dot;
   /*
-   * Reader acts as a "Handler" for ReadLooper
+   * Reader acts as a "Handler" for DotLooper
    */
 class Reader : public DotOperation
 {

@@ -2,7 +2,7 @@
 #define _READ_LOOPER_EVENT_H
 namespace dot
 {
-enum class ReadLooperEvent
+enum class DotLooperEvent
 {
     DISCONNECTED
 };
