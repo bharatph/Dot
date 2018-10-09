@@ -9,7 +9,7 @@ extern "C"
 #include <comm.h>
 }
 
-#include <Dot/DotLooperEvent.hpp>
+#include <Dot/DotEvent.hpp>
 
 static const char *TAG = "DotLooper";
 
@@ -33,7 +33,7 @@ void dot::DotLooper::run()
 			{
 				log_err(TAG, "Client disconnected");
 				shouldRun = false;
-				fireEvent(DotLooperEvent::DISCONNECTED);
+				fireEvent(DotEvent::DISCONNECTED);
 				continue;
 			}
 			//compare read line with registered readers

@@ -5,7 +5,6 @@
 
 #include <Dot/DotEvent.hpp>
 #include <Dot/DotOperation.hpp>
-#include <Dot/DotLooperEvent.hpp>
 #include <Dot/DotLooper.hpp>
 #include <Dot/Reader.hpp>
 #include <Dot/Writer.hpp>
@@ -32,7 +31,7 @@ dot::Dot::Dot(comm_socket sock)
 {
   this->current_sock = sock;
   readLooper = new DotLooper(this);
-  readLooper->addEventHandler(DotLooperEvent::DISCONNECTED, [&](){
+  readLooper->addEventHandler(DotEvent::DISCONNECTED, [&](){
     fireEvent(DotEvent::DISCONNECTED, *this);
   });
   readLooper->run();
