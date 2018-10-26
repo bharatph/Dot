@@ -18,29 +18,54 @@ Dot &setup_and_start_server()
           std::vector<std::string> msgs;
           msgs.push_back("good");
           msgs.push_back("day");
-          dot.readFor(msgs).on(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
+          dot.readFor(msgs).onSuccess([](Dot &dot, std::string message) {
             std::cout << "good day read" << std::endl;
             dot.write("good day");
           });
         })
-      .on(DotEvent::DISCONNECTED, [](Dot &dot) {
+      .onDisconnect([](Dot &dot) {
         std::cout << "server closed" << std::endl;
+      });
+  return server;
+}
+
+Dot &modular_server()
+{
+  Dot &server = Dot::getDot(3500);
+  server
+      .onConnect([](Dot &dot) {
+        std::cout << "Client: " << dot.getUid() << " connected" << std::endl;
+        dot.readFor("([a-z])*")
+            .onSuccess([](Dot &dot, std::string message) {
+              std::cout << dot.getUid() << ": " << message << std::endl;
+            })
+            .onFailed([](Dot &dot, std::string message) {
+              std::cout << "Unmatched syntax" << std::endl;
+            });
+        dot.onDisconnect([](Dot &dot) {
+          std::cout << "Client: " << dot.getUid() << " disconnected" << std::endl;
+        });
+      })
+      .onDisconnect([](Dot &dot) {
+        std::cout << "Server closed successfully" << std::endl;
+      })
+      .onFailed([](Dot &dot) {
+        std::cout << "Error occured, check the logs" << std::endl;
       });
   return server;
 }
 
 Dot &read_all_server()
 {
-
   Dot &server = Dot::getDot(3500);
-  server.on(DotEvent::CONNECTED, [](Dot &dot) {
-    dot.readFor("([a-z])*").on(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
+  server.onConnect([](Dot &dot) {
+    dot.readFor("([a-z])*").onSuccess([](Dot &dot, std::string message) {
                              std::cout << message << std::endl;
                            })
-        .on(DotOperationEvent::FAILED, [](Dot &dot, std::string message) {
+        .onFailed([](Dot &dot, std::string message) {
           std::cout << "error message" << std::endl;
         });
-    dot.on(DotEvent::DISCONNECTED, [](Dot &dot) {
+    dot.onDisconnect([](Dot &dot) {
       std::cout << "Client disconnected" << std::endl;
     });
   });
@@ -53,20 +78,21 @@ Dot &send_binary()
   server
       .on(DotEvent::CONNECTED, [](Dot &dot) {
         dot.readFor("hello")
-            .on(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
+            .onSuccess([](Dot &dot, std::string message) {
               std::cout << "hello read" << std::endl;
-              dot.getLooper().sendFile("./Dot_server_test");
+              dot.sendFile("./Dot_server_test");
             });
       })
-      .on(DotEvent::DISCONNECTED, [](Dot &) {
+      .onDisconnect([](Dot &) {
         std::cout << "disconnected" << std::endl;
       });
   return server;
 }
 
+//TODO FIXME server and regex test
 int main(int argc, char *argv[])
 {
-  Dot &server = read_all_server();
+  Dot &server = modular_server();
   char c = 'a';
   std::cin >> c;
   if (c == 'q')
@@ -74,5 +100,7 @@ int main(int argc, char *argv[])
     server.disconnect();
     return 0;
   }
-  return server.run();
+  while (1)
+    ;
+  return 0;
 }

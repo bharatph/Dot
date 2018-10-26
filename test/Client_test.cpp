@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <Dot/Dot.hpp>
 
 using namespace dot;
@@ -9,7 +10,7 @@ int main(int argc, char *argv[])
       .on(DotEvent::CONNECTED, [](Dot &dot) {
         dot.write("hello");
         //std::cout<< "reading file" << std::endl;
-        std::ofstream &file = dot.getLooper().readFile(200);
+        std::ofstream &file = dot.readFile(200);
         file.close();
         dot.on(DotEvent::DISCONNECTED, [](Dot &dot) {
           std::cout << "disconnected" << '\n';
@@ -21,5 +22,6 @@ int main(int argc, char *argv[])
       .on(DotEvent::DISCONNECTED, [](Dot &dot) {
         std::cout << "disconnected" << '\n';
       });
-  return dot.run();
+      while(1);
+      return 0;
 }

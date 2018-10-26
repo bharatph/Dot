@@ -17,9 +17,9 @@
 #include <queue>
 
 #include <Dot/DotEvent.hpp>
-#include <Dot/Reader.hpp>
-#include <Dot/Writer.hpp>
-#include <Dot/DotLooper.hpp>
+#include <Dot/DotEventManager.hpp>
+#include <Dot/DotOperation.hpp>
+#include <crossguid/guid.hpp>
 
 extern "C"
 {
@@ -36,27 +36,31 @@ namespace dot
      * Read is either blocking or non-blocking
      * Write is non-blocking
   	 */
-class Dot : protected em::EventManager<dot::DotEvent, Dot &>
+
+class Dot : public DotEventManager
 {
 private:
   comm_socket current_sock;
+  xg::Guid uid;
   std::vector<Dot *> connectedDots;
   static std::map<int, Dot *> *instances;
-  DotLooper *readLooper;
-  std::map<std::string, EventCallback> readForMap;
-  std::queue<DotOperation> incomingQueue;
-  std::queue<DotOperation> outgoingQueue;
+  //DotLooper *readLooper;
+  std::queue<DotOperation *> incomingQueue;
+  std::queue<DotOperation *> outgoingQueue;
   std::future<void> runner;
   std::thread *serverThread = nullptr;
+  bool shouldRun = false;
+  bool readText = false;
+  std::map<DotOperation *, std::string> textReaders;
+  std::thread *runnerThread = nullptr;
   bool shouldServerRun = false;
-  Dot &listen(int port);
+
   Dot();
-  Dot(const Dot &dot);
+  Dot &listen(int port);
 
 protected:
 public:
   Dot(comm_socket);
-  Dot &on(DotEvent, EventCallback);
   //returns the dot of the current system
   static Dot &getDot(int port);
   static Dot &getDot();
@@ -64,16 +68,21 @@ public:
   Dot &disconnect();
   void resume();
   comm_socket getSocket();
-  DotLooper &getLooper();
-  Writer &write(std::string message);
-  Reader &read();
-  Reader &readFor(int binaryFile, std::string fileType);
+  DotOperation &write(std::string message);
+  DotOperation &read();
+  DotOperation &readFor(int binaryFile, std::string fileType);
+  std::string getUid();
   /*
      * Regex supported readFor
      */
-  Reader &readFor(std::string message);
-  Reader &readFor(std::vector<std::string> messages);
-  int run();
+  DotOperation &readFor(std::string message);
+  DotOperation &readFor(std::vector<std::string> messages);
+
+  void run();
+  void stop();
+  int sendFile(std::string);
+  std::ofstream &readFile(int toRead);
+  void registerReader(DotOperation &, std::string);
   ~Dot();
 };
 } // namespace dot

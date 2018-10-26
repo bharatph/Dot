@@ -6,10 +6,13 @@ namespace dot {
 	{
 		INITIALIZED,
 		TIMEOUT,
+		CONNECT,
 		CONNECTED,
 		RESUME,
 		PAUSE,
-		DISCONNECTED
+		DISCONNECT,
+		DISCONNECTED,
+		FAILED
 	};
 }
 #endif

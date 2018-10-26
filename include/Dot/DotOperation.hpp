@@ -4,16 +4,29 @@
 #include <em/EventManager.hpp>
 #include <Dot/DotOperationEvent.hpp>
 
-namespace dot {
-  class Dot;
-class DotOperation : public em::EventManager<DotOperationEvent, Dot &, std::string> {
-    public:
-    DotOperation();
-    ~DotOperation();
-    virtual void notify(std::string);
-    DotOperation &on(DotOperationEvent, EventCallback);
-    EventCallback getEventHandler();
+namespace dot
+{
+class Dot;
+class DotOperation : public em::EventManager<DotOperationEvent, Dot &, std::string>
+{
+
+public:
+  typedef std::function<void(DotOperation &)> OperationCallback;
+
+private:
+  DotOperation &on(DotOperationEvent, EventCallback);
+  OperationCallback operationCallback;
+  Dot *dot;
+
+public:
+  DotOperation(Dot &dot, OperationCallback);
+  ~DotOperation();
+  Dot &getDot();
+  DotOperation &onSuccess(EventCallback);
+  DotOperation &onFailed(EventCallback);
+  DotOperation &onTimeout(EventCallback);
+  void execute();
 };
-}
+} // namespace dot
 
 #endif
