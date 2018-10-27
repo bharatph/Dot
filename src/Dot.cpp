@@ -25,12 +25,12 @@ comm_socket dot::Dot::getSocket()
 dot::Dot::Dot()
 {
   uid = xg::newGuid();
-  run();
 }
 
 dot::Dot::Dot(comm_socket sock) : Dot()
 {
   this->current_sock = sock;
+  run();
 }
 
 dot::Dot &dot::Dot::listen(int port)
@@ -99,8 +99,7 @@ dot::Dot &dot::Dot::connect(std::string host, int port)
     Dot *dot = new Dot(sock);
     connectedDots.push_back(dot);
     fireEvent(DotEvent::CONNECTED, *dot);
-  },
-                                                  port);
+  }, port);
   //connectionThread->detach();
   return (*this);
 }
@@ -153,7 +152,6 @@ dot::DotOperation &dot::Dot::read()
 {
   // TODO: insert return statement here
   DotOperation &reader = (*new DotOperation(*this, [](DotOperation &dotOperation){
-
   }));
   return reader;
   //TODO read and call events
@@ -207,10 +205,11 @@ void dot::Dot::run()
     shouldRun = true;
     while (shouldRun)
     {
-      if (textReaders.size() == 0)
-      {
-        continue;
-      }
+      //TODO INVESTIGATE
+      // if (textReaders.size() == 0)
+      // {
+      //   continue;
+      // }
       //read the main socket in regular intervals
       char *buffer = comm_read_text(current_sock, 1024);
       if (buffer == NULL)
