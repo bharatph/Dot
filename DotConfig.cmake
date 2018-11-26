@@ -1,4 +1,5 @@
 find_package(comm)
+find_package(crossguid)
 find_path(DOT_INCLUDE_DIR Dot/Dot.hpp PATH_SUFFIXES /usr/local/include/ /usr/include/ $ENV{Dot_DIR}/include/)
 find_library(DOT_LIBS Dot PATH_SUFFIXES /usr/local/lib /usr/lib $ENV{Dot_DIR}/lib)
 get_filename_component(DOT_LIBRARY_DIR ${DOT_LIBS} PATH)
