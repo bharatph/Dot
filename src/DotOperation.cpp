@@ -15,25 +15,20 @@ dot::Dot &dot::DotOperation::getDot()
   return *dot;
 }
 
-dot::DotOperation &dot::DotOperation::on(dot::DotOperationEvent dotOperationEvent, EventCallback eventCallback)
+dot::DotOperation &dot::DotOperation::chain(dot::DotOperationEvent dotOperationEvent, EventCallback eventCallback)
 {
-  addEventHandler(dotOperationEvent, eventCallback);
+  on(dotOperationEvent, eventCallback);
   return *this;
 }
 
 dot::DotOperation &dot::DotOperation::onSuccess(EventCallback eventCallback)
 {
-  return on(DotOperationEvent::SUCCESS, eventCallback);
+  return chain(DotOperationEvent::SUCCESS, eventCallback);
 }
 
 dot::DotOperation &dot::DotOperation::onFailed(EventCallback eventCallback)
 {
-  return on(DotOperationEvent::FAILED, eventCallback);
-}
-
-dot::DotOperation &dot::DotOperation::onTimeout(EventCallback eventCallback)
-{
-  return on(DotOperationEvent::TIMEOUT, eventCallback);
+  return chain(DotOperationEvent::FAILED, eventCallback);
 }
 
 void dot::DotOperation::execute(){

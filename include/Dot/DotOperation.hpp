@@ -14,7 +14,7 @@ public:
   typedef std::function<void(DotOperation &)> OperationCallback;
 
 private:
-  DotOperation &on(DotOperationEvent, EventCallback);
+  DotOperation &chain(DotOperationEvent, EventCallback);
   OperationCallback operationCallback;
   Dot *dot;
 
@@ -24,7 +24,6 @@ public:
   Dot &getDot();
   DotOperation &onSuccess(EventCallback);
   DotOperation &onFailed(EventCallback);
-  DotOperation &onTimeout(EventCallback);
   void execute();
 };
 } // namespace dot

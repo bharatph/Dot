@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
   Dot &dot = Dot::getDot(0);
   dot.connect("localhost", 3500)
-      .on(DotEvent::CONNECTED, [](Dot &dot) {
+      .onConnect([](Dot &dot) {
         dot.write("hello");
         //std::cout<< "reading file" << std::endl;
         std::ofstream &file = dot.readFile(200);
@@ -17,9 +17,7 @@ int main(int argc, char *argv[])
         });
         //dot.disconnect();
       })
-      .on(DotEvent::TIMEOUT, [](Dot &dot) {
-      })
-      .on(DotEvent::DISCONNECTED, [](Dot &dot) {
+      .onDisconnect([](Dot &dot) {
         std::cout << "disconnected" << '\n';
       });
       while(1);
