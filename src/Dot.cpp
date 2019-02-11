@@ -5,7 +5,7 @@
 #include <fstream>
 
 #include <Dot/DotEvent.hpp>
-#include <Dot/DotOperation.hpp>
+#include <Dot/Operation.hpp>
 #include <regex>
 
 extern "C"
@@ -107,7 +107,7 @@ dot::Dot &dot::Dot::connect(std::string host, int port)
 dot::Dot &dot::Dot::disconnect()
 {
   //TODO if connected disconnect, else don't bother
-  //DotOperation dotOperation;
+  //Operation dotOperation;
   //dotState.val = "disconnected";
   if (comm_close_socket(current_sock) < 0)
   {
@@ -120,16 +120,16 @@ dot::Dot &dot::Dot::disconnect()
 }
 void dot::Dot::resume()
 {
-  //DotOperation dotOperation;
+  //Operation dotOperation;
   //dotState.val = "resume";
   fireEvent(DotEvent::RESUME, *this);
 }
-dot::DotOperation &dot::Dot::write(std::string message)
+dot::Operation &dot::Dot::write(std::string message)
 {
   //add to queue and let runner decide whether to run or not
   //DotState dotState;
   //writeFunc(dotState);
-  DotOperation *operation = new DotOperation(*this, [&](DotOperation &dotOperation) {
+  Operation *operation = new Operation(*this, [&](Operation &dotOperation) {
     char *temp = strdup(message.c_str());
     //comm_write_text(dot->getSocket(), message.c_str(), message.en);u
     size_t wrote = ::send(current_sock, temp, message.length(), 0); //TODO use libcomm to support atomic functions
@@ -147,43 +147,34 @@ dot::DotOperation &dot::Dot::write(std::string message)
   outgoingQueue.push(operation);
   return *operation;
 }
+//
+// dot::Operation &dot::Dot::read()
+// {
+//   // TODO: insert return statement here
+//   Operation &reader = (*new Operation(*this, [](Operation &dotOperation){
+//   }));
+//   return reader;
+//   //TODO read and call events
+//   // Operation &operation = new Operation(*this, [](Operation &dotOperation){
+//   //   ::recv(current_sock, buf, )
+//   // });
+// }
 
-dot::DotOperation &dot::Dot::read()
+dot::Operation &dot::Dot::readFor(std::string message)
 {
-  // TODO: insert return statement here
-  DotOperation &reader = (*new DotOperation(*this, [](DotOperation &dotOperation){
-  }));
-  return reader;
-  //TODO read and call events
-  // DotOperation &operation = new DotOperation(*this, [](DotOperation &dotOperation){
-  //   ::recv(current_sock, buf, )
-  // });
-}
-
-dot::DotOperation &dot::Dot::readFor(int binaryFile, std::string fileType)
-{
-  DotOperation &reader = *(new DotOperation(*this, [](DotOperation &){
-
-  }));
-  //return reader.read(fileType);
-  return reader;
-}
-
-dot::DotOperation &dot::Dot::readFor(std::string message)
-{
-  DotOperation &reader = *(new DotOperation(*this, [](DotOperation &operationCallback){
+  Operation &reader = *(new Operation(*this, [](Operation &operationCallback){
 
   }));
   registerReader(reader, message);
   return reader;
 }
 
-dot::DotOperation &dot::Dot::readFor(std::vector<std::string> messages)
+dot::Operation &dot::Dot::readFor(std::vector<std::string> messages)
 {
   if (messages.size() == 0)
   {
     //throw exception perhaps?
-    return *(new DotOperation(*this, [](DotOperation &operationCallback){
+    return *(new Operation(*this, [](Operation &operationCallback){
 
     }));
   }
@@ -193,9 +184,13 @@ dot::DotOperation &dot::Dot::readFor(std::vector<std::string> messages)
   //   reader
   // }
   //FIXME
-  return *(new DotOperation(*this, [](DotOperation &operationCallback){
+  return *(new Operation(*this, [](Operation &operationCallback){
 
   }));
+}
+
+dot::BinaryReadOperation &dot::Dot::read(int bytesToRead){
+  return *(new BinaryReadOperation(*this, bytesToRead));
 }
 
 //use libev insted to read
@@ -220,7 +215,7 @@ void dot::Dot::run()
         continue;
       }
       //compare read line with registered readers
-      for (std::pair<DotOperation *, std::string> textReaderPair : textReaders)
+      for (std::pair<Operation *, std::string> textReaderPair : textReaders)
       {
         std::regex reg(textReaderPair.second);
         textReaderPair.first->fireEvent(std::regex_match(buffer, reg) ? DotOperationEvent::SUCCESS : DotOperationEvent::FAILED, textReaderPair.first->getDot(), buffer); //TODO send timestamp with messages
@@ -266,7 +261,7 @@ std::ofstream &dot::Dot::readFile(int toRead)
   return file;
 }
 
-void dot::Dot::registerReader(DotOperation &reader, std::string message)
+void dot::Dot::registerReader(Operation &reader, std::string message)
 {
   textReaders[&reader] = message;
 }
