@@ -8,11 +8,11 @@ using namespace dot;
 Dot &setup_and_start_server()
 {
   Dot &server = Dot::getDot(3500);
-  server.on(DotEvent::CONNECTED, [](Dot &dot) {
-          dot.readFor("hi").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
+  server.onConnect([](Dot &dot) {
+          dot.readFor("hi").onSuccess([](Dot &dot, std::string message) {
             std::cout << "hi read" << '\n';
           });
-          dot.readFor("hello").addEventHandler(DotOperationEvent::SUCCESS, [](Dot &dot, std::string message) {
+          dot.readFor("hello").onSuccess([](Dot &dot, std::string message) {
             std::cout << "hello read" << '\n';
           });
           std::vector<std::string> msgs;
@@ -76,7 +76,7 @@ Dot &send_binary()
 {
   Dot &server = Dot::getDot(3500);
   server
-      .on(DotEvent::CONNECTED, [](Dot &dot) {
+      .onConnect([](Dot &dot) {
         dot.readFor("hello")
             .onSuccess([](Dot &dot, std::string message) {
               std::cout << "hello read" << std::endl;

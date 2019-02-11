@@ -18,7 +18,9 @@
 
 #include <Dot/DotEvent.hpp>
 #include <Dot/DotEventManager.hpp>
-#include <Dot/DotOperation.hpp>
+#include <Dot/Operation.hpp>
+#include <Dot/BinaryReadOperation.hpp>
+
 #include <crossguid/guid.hpp>
 
 extern "C"
@@ -30,12 +32,12 @@ extern "C"
 namespace dot
 {
 /*
-  	 * All connected device is a Dot
-  	 * The current host is also a Dot
-     * Every dot has read and write operation
-     * Read is either blocking or non-blocking
-     * Write is non-blocking
-  	 */
+ * All connected device is a Dot
+ * The current host is also a Dot
+ * Every dot has read and write operation
+ * Read is either blocking or non-blocking
+ * Write is non-blocking
+ */
 
 class Dot : public DotEventManager
 {
@@ -45,13 +47,13 @@ private:
   std::vector<Dot *> connectedDots;
   static std::map<int, Dot *> *instances;
   //DotLooper *readLooper;
-  std::queue<DotOperation *> incomingQueue;
-  std::queue<DotOperation *> outgoingQueue;
+  std::queue<Operation *> incomingQueue;
+  std::queue<Operation *> outgoingQueue;
   std::future<void> runner;
   std::thread *serverThread = nullptr;
   bool shouldRun = false;
   bool readText = false;
-  std::map<DotOperation *, std::string> textReaders;
+  std::map<Operation *, std::string> textReaders;
   std::thread *runnerThread = nullptr;
   bool shouldServerRun = false;
 
@@ -67,22 +69,31 @@ public:
   Dot &connect(std::string host, int port);
   Dot &disconnect();
   void resume();
+
+  //returns comm_socket of libcomm library
   comm_socket getSocket();
-  DotOperation &write(std::string message);
-  DotOperation &read();
-  DotOperation &readFor(int binaryFile, std::string fileType);
+
+  //returns the uuid of the dot, the uuid is generated based on the implementation of the OS
+  //visit https://www.github.com/graeme-hills/crossguid for more info
   std::string getUid();
-  /*
-     * Regex supported readFor
-     */
-  DotOperation &readFor(std::string message);
-  DotOperation &readFor(std::vector<std::string> messages);
+
+  /**** Binary operations ****/
+  Operation &write(std::string message);
+  /* Returns a handler for the operation which gives registration for events
+   * until the mentioned size of bytes are received
+   */
+  BinaryReadOperation &read(int bytesToRead);
+
+  /**** Text operations ****/
+  //Regex supported text mode
+  Operation &readFor(std::string message);
+  Operation &readFor(std::vector<std::string> messages);
 
   void run();
   void stop();
   int sendFile(std::string);
   std::ofstream &readFile(int toRead);
-  void registerReader(DotOperation &, std::string);
+  void registerReader(Operation &, std::string);
   ~Dot();
 };
 } // namespace dot

@@ -10,7 +10,6 @@ namespace dot
 enum class DotOperationEvent
 {
     SUCCESS,
-    TIMEOUT,
     FAILED
 };
 } // namespace dot

@@ -14,25 +14,25 @@ public:
   {
   }
 
-  DotEventManager &on(DotEvent dotEvent, EventCallback eventCallback)
+  DotEventManager &chain(DotEvent dotEvent, EventCallback eventCallback)
   {
-    addEventHandler(dotEvent, eventCallback);
+    on(dotEvent, eventCallback);
     return (*this);
   }
 
   DotEventManager &onConnect(EventCallback eventCallback)
   {
-    return on(DotEvent::CONNECTED, eventCallback);
+    return chain(DotEvent::CONNECTED, eventCallback);
   }
 
   DotEventManager &onDisconnect(EventCallback eventCallback)
   {
-    return on(DotEvent::DISCONNECTED, eventCallback);
+    return chain(DotEvent::DISCONNECTED, eventCallback);
   }
 
   DotEventManager &onFailed(EventCallback eventCallback)
   {
-    return on(DotEvent::FAILED, eventCallback);
+    return chain(DotEvent::FAILED, eventCallback);
   }
 };
 } // namespace dot
