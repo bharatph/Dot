@@ -42,7 +42,7 @@ namespace dot
 class Dot : public DotEventManager
 {
 private:
-  comm_socket current_sock;
+  xs_SOCKET current_sock;
   xg::Guid uid;
   std::vector<Dot *> connectedDots;
   static std::map<int, Dot *> *instances;
@@ -62,7 +62,7 @@ private:
 
 protected:
 public:
-  Dot(comm_socket);
+  Dot(xs_SOCKET);
   //returns the dot of the current system
   static Dot &getDot(int port);
   static Dot &getDot();
@@ -70,8 +70,8 @@ public:
   Dot &disconnect();
   void resume();
 
-  //returns comm_socket of libcomm library
-  comm_socket getSocket();
+  //returns xs_SOCKET of libcomm library
+  xs_SOCKET getSocket();
 
   //returns the uuid of the dot, the uuid is generated based on the implementation of the OS
   //visit https://www.github.com/graeme-hills/crossguid for more info

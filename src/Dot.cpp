@@ -17,7 +17,7 @@ std::map<int, dot::Dot *> *dot::Dot::instances = nullptr;
 
 static const char *TAG = "Dot";
 
-comm_socket dot::Dot::getSocket()
+xs_SOCKET dot::Dot::getSocket()
 {
   return current_sock;
 }
@@ -27,7 +27,7 @@ dot::Dot::Dot()
   uid = xg::newGuid();
 }
 
-dot::Dot::Dot(comm_socket sock) : Dot()
+dot::Dot::Dot(xs_SOCKET sock) : Dot()
 {
   this->current_sock = sock;
   run();
@@ -41,13 +41,12 @@ dot::Dot &dot::Dot::listen(int port)
     //run with defualt port
     while (shouldServerRun)
     {
-      comm_socket sock = comm_start_server(port_val);
+      xs_SOCKET sock = comm_start_server(port_val);
       if (sock < 1)
       {
         fireEvent(DotEvent::FAILED, *this);
         return;
       }
-      std::cout << sock << std::endl;
       Dot *dot = new Dot(sock);
       connectedDots.push_back(dot);
       fireEvent(DotEvent::CONNECTED, *dot);
@@ -67,7 +66,7 @@ dot::Dot &dot::Dot::getDot(int port)
   {
     if (comm_init() < 0)
     {
-      log_err(_DOT, "Cannot initialize Dot, make sure you have all the prerequisites installed");
+      clog_e(_DOT, "Cannot initialize Dot, make sure you have all the prerequisites installed");
     }
     (*instances)[port] = new Dot();
     (*instances)[port]->listen(port);
@@ -89,10 +88,10 @@ dot::Dot &dot::Dot::getDot()
 dot::Dot &dot::Dot::connect(std::string host, int port)
 {
   std::thread *connectionThread = new std::thread([&](int port_param) {
-    comm_socket sock = comm_connect_server(host.c_str(), port_param);
+    xs_SOCKET sock = comm_connect_server(host.c_str(), port_param);
     if (sock < 1)
     {
-      log_err(_DOT, "Connection failed");
+      clog_e(_DOT, "Connection failed");
       fireEvent(DotEvent::DISCONNECTED, *this);
       return;
     }
@@ -112,7 +111,7 @@ dot::Dot &dot::Dot::disconnect()
   if (comm_close_socket(current_sock) < 0)
   {
     //print error
-    log_err(_DOT, "Cannot close socket properly");
+    clog_e(_DOT, "Cannot close socket properly");
   }
   shouldServerRun = false;
   fireEvent(DotEvent::DISCONNECTED, *this);
@@ -135,7 +134,7 @@ dot::Operation &dot::Dot::write(std::string message)
     size_t wrote = ::send(current_sock, temp, message.length(), 0); //TODO use libcomm to support atomic functions
     if (wrote < 1)
     {
-      log_err(TAG, "Opeation failed");
+      clog_e(TAG, "Opeation failed");
       dotOperation.fireEvent(DotOperationEvent::FAILED, *this, message);
     }
     else
@@ -209,7 +208,7 @@ void dot::Dot::run()
       char *buffer = comm_read_text(current_sock, 1024);
       if (buffer == NULL)
       {
-        log_inf(TAG, "Client disconnected");
+        clog_i(TAG, "Client disconnected");
         shouldRun = false;
         fireEvent(DotEvent::DISCONNECTED, *this);
         continue;
