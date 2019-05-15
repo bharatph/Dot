@@ -6,13 +6,13 @@ dot::Operation::~Operation()
   std::cout << "Ending" << std::endl;
 }
 
-dot::Operation::Operation(Dot &dot, OperationCallback operationCallback) : dot(&dot), operationCallback(operationCallback)
+dot::Operation::Operation(Dot &d, OperationCallback operationCallback) : d(&d), operationCallback(operationCallback)
 {
 }
 
 dot::Dot &dot::Operation::getDot()
 {
-  return *dot;
+  return *d;
 }
 
 dot::Operation &dot::Operation::chain(dot::DotOperationEvent dotOperationEvent, EventCallback eventCallback)

@@ -15,11 +15,11 @@ public:
 
 private:
   Operation &chain(DotOperationEvent, EventCallback);
+  Dot *d;
   OperationCallback operationCallback;
-  Dot *dot;
 
 public:
-  Operation(Dot &dot, OperationCallback);
+  Operation(Dot &d, OperationCallback);
   ~Operation();
   Dot &getDot();
   Operation &onSuccess(EventCallback);

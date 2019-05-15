@@ -87,7 +87,8 @@ dot::Dot &dot::Dot::getDot()
 
 dot::Dot &dot::Dot::connect(std::string host, int port)
 {
-  std::thread *connectionThread = new std::thread([&](int port_param) {
+  //connectionThread
+  std::thread([&](int port_param) {
     xs_SOCKET sock = comm_connect_server(host.c_str(), port_param);
     if (sock < 1)
     {
