@@ -19,6 +19,7 @@ file(GLOB_RECURSE DOT_HDRS "include/*.hpp")
 file(GLOB_RECURSE DOT_SRCS "src/*.cpp")
 
 add_library(Dot ${DOT_SRCS})
+set_property(TARGET Dot PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_include_directories(Dot PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
