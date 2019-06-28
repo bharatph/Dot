@@ -27,16 +27,13 @@ target_include_directories(Dot PUBLIC
 #dependencies
 target_link_libraries(Dot ${CMAKE_THREAD_LIBS_INIT})
 
-target_link_libraries(Dot clog)
-target_include_directories(Dot PRIVATE clog)
+target_link_libraries(Dot clog::clog)
 
-target_link_libraries(Dot comm)
-target_include_directories(Dot PRIVATE comm)
+target_link_libraries(Dot comm::comm)
 
-target_include_directories(Dot PRIVATE EventManager)
+target_link_libraries(Dot EventManager)
 
 target_link_libraries(Dot crossguid)
-target_include_directories(Dot PRIVATE crossguid)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(WARNINGS "-Werror" "-Wall")
