@@ -25,15 +25,15 @@ target_include_directories(Dot PUBLIC
     $<INSTALL_INTERFACE:include>)
 
 #dependencies
-target_link_libraries(Dot ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(Dot PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-target_link_libraries(Dot clog::clog)
+target_link_libraries(Dot PRIVATE clog::clog)
 
-target_link_libraries(Dot comm::comm)
+target_link_libraries(Dot PRIVATE comm::comm)
 
-target_link_libraries(Dot EventManager)
+target_link_libraries(Dot PRIVATE EventManager)
 
-target_link_libraries(Dot crossguid)
+target_link_libraries(Dot PRIVATE crossguid)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(WARNINGS "-Werror" "-Wall")
