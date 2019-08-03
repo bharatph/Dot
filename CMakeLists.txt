@@ -71,7 +71,7 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	# Make cmake config files for all targets
 	install(EXPORT  DotTargets
 		DESTINATION ${DOT_CMAKE_CONFIG_INSTALL_DIR}
-		FILE Dot-config.cmake)
+		FILE DotConfig.cmake)
 
 	# Install readme and license
 	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
