@@ -1,4 +1,5 @@
-# Dot
+Dot {#mainpage}
+=========
 Asynchronous network library for C++ targeted for TCP/IPv4 stack with no protocol overhead
 
 ### Why no protocol overhead?

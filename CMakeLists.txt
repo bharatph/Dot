@@ -8,6 +8,15 @@ find_package(comm)
 find_package(EventManager)
 find_package(crossguid)
 
+# Set the build type if not set
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
+	find_package(Doxygen QUIET)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
 # Set the build type if not set
@@ -76,6 +85,24 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	# Install readme and license
 	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
 		DESTINATION ${DOT_ADDITIONAL_FILES_INSTALL_DIR})
+endif()
+
+
+if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
+	set(DOXYGEN_GENERATE_HTML YES)
+	set(DOXYGEN_GENERATE_MAN YES)
+	set(DOXYGEN_EXAMPLE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test)
+	if(DOXYGEN_FOUND)
+		doxygen_add_docs(
+			dot_docs
+			${DOT_SRCS} ${DOT_HDRS}
+			USE_MDFILE_AS_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/README.md
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+			COMMENT "Generate man and html pages"
+		)
+	else()
+		message("Doxygen need to be installed to generate the doxygen documentation")
+	endif()
 endif()
 
 if (DOT_TESTS)
